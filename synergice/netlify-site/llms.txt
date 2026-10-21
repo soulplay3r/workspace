@@ -1,0 +1,53 @@
+# Synergice
+
+> Synergice is the B2B partnering platform of Strides Pharma Science Limited (Bengaluru, India; European hub in Zug, Switzerland). This site lists molecules from the Strides portfolio with approval history, mechanism of action and key facts, and takes partnering enquiries. It is intended for pharmaceutical business partners, not patients.
+
+## Company
+- [About Synergice](https://www.synergice.com/about.html): who we are, key facts and milestones
+- [Contact the partnering team](https://www.synergice.com/contact.html): enquiry form (name, email, how you heard about us, what you want to know)
+
+## Therapy areas
+- [Cardiovascular](https://www.synergice.com/therapy/cardiovascular.html): Amlodipine, Atorvastatin, Clopidogrel, Metoprolol, Rosuvastatin
+- [Oncology](https://www.synergice.com/therapy/oncology.html): Anastrozole, Capecitabine, Imatinib, Letrozole
+- [Transplant & Immunology](https://www.synergice.com/therapy/transplant-immunology.html): Cyclosporine, Mycophenolate Mofetil, Tacrolimus
+- [Pain & Inflammation](https://www.synergice.com/therapy/pain-inflammation.html): Colchicine, Ibuprofen, Naproxen Sodium
+- [Central Nervous System](https://www.synergice.com/therapy/central-nervous-system.html): Amantadine, Methylphenidate
+- [HIV / Antiretrovirals](https://www.synergice.com/therapy/hiv-antiretrovirals.html): Tenofovir DF / Lamivudine / Dolutegravir, Tenofovir DF / Lamivudine / Efavirenz
+- [Anti-malarials](https://www.synergice.com/therapy/anti-malarials.html): Artemether / Lumefantrine
+- [Anti-infectives](https://www.synergice.com/therapy/anti-infectives.html): Nitrofurantoin
+- [Urology](https://www.synergice.com/therapy/urology.html): Dutasteride
+- [Endocrine & Corticosteroids](https://www.synergice.com/therapy/endocrine-corticosteroids.html): Prednisone
+- [Vitamins & Electrolytes](https://www.synergice.com/therapy/vitamins-electrolytes.html): Ergocalciferol, Potassium Chloride
+- [Women's Health](https://www.synergice.com/therapy/womens-health.html): Progesterone
+
+## Molecules
+- [Amantadine](https://www.synergice.com/molecule/amantadine.html): Adamantane antiviral and antiparkinsonian agent (NMDA receptor antagonist); first approved 1966, US FDA (influenza A); ATC N04BB01
+- [Amlodipine](https://www.synergice.com/molecule/amlodipine.html): Dihydropyridine calcium channel blocker; first approved July 1992, US FDA; ATC C08CA01
+- [Anastrozole](https://www.synergice.com/molecule/anastrozole.html): Non-steroidal aromatase inhibitor; first approved December 1995, US FDA; ATC L02BG03
+- [Artemether / Lumefantrine](https://www.synergice.com/molecule/artemether-lumefantrine.html): Artemisinin-based combination therapy (ACT); first approved 1999 (first registration); April 2009, US FDA; ATC P01BF01
+- [Atorvastatin](https://www.synergice.com/molecule/atorvastatin.html): HMG-CoA reductase inhibitor (statin); first approved December 1996, US FDA; ATC C10AA05
+- [Capecitabine](https://www.synergice.com/molecule/capecitabine.html): Oral fluoropyrimidine (antimetabolite prodrug of 5-fluorouracil); first approved April 1998, US FDA; ATC L01BC06
+- [Clopidogrel](https://www.synergice.com/molecule/clopidogrel.html): P2Y12 inhibitor (thienopyridine antiplatelet); first approved November 1997, US FDA; ATC B01AC04
+- [Colchicine](https://www.synergice.com/molecule/colchicine.html): Anti-gout agent; microtubule inhibitor (alkaloid); first approved July 2009, US FDA (Colcrys); used for centuries before; ATC M04AC01
+- [Cyclosporine](https://www.synergice.com/molecule/cyclosporine.html): Calcineurin inhibitor (cyclic peptide immunosuppressant); first approved November 1983, US FDA; ATC L04AD01
+- [Dutasteride](https://www.synergice.com/molecule/dutasteride.html): Dual 5-alpha reductase inhibitor (4-azasteroid); first approved November 2001, US FDA; ATC G04CB02
+- [Ergocalciferol](https://www.synergice.com/molecule/ergocalciferol.html): Vitamin D2 (secosteroid prohormone); first approved Characterised early 1930s; long-established in clinical use; ATC A11CC01
+- [Ibuprofen](https://www.synergice.com/molecule/ibuprofen.html): Non-steroidal anti-inflammatory drug (propionic acid derivative); first approved 1969, UK; 1974, US FDA; ATC M01AE01
+- [Imatinib](https://www.synergice.com/molecule/imatinib.html): BCR-ABL tyrosine kinase inhibitor; first approved May 2001, US FDA; ATC L01EA01
+- [Letrozole](https://www.synergice.com/molecule/letrozole.html): Non-steroidal aromatase inhibitor; first approved July 1997, US FDA; ATC L02BG04
+- [Methylphenidate](https://www.synergice.com/molecule/methylphenidate.html): Central nervous system stimulant (dopamine and noradrenaline reuptake inhibitor); first approved 1955, US FDA; ATC N06BA04
+- [Metoprolol](https://www.synergice.com/molecule/metoprolol.html): Beta-1 selective adrenergic blocker; first approved 1978, US FDA (metoprolol tartrate); ATC C07AB02
+- [Mycophenolate Mofetil](https://www.synergice.com/molecule/mycophenolate-mofetil.html): Immunosuppressant; inosine monophosphate dehydrogenase (IMPDH) inhibitor; first approved May 1995, US FDA; ATC L04AA06
+- [Naproxen Sodium](https://www.synergice.com/molecule/naproxen-sodium.html): Non-steroidal anti-inflammatory drug (propionic acid derivative); first approved 1976, US FDA (naproxen); OTC naproxen sodium 1994; ATC M01AE02
+- [Nitrofurantoin](https://www.synergice.com/molecule/nitrofurantoin.html): Nitrofuran antibacterial (urinary antiseptic); first approved 1953, US FDA (Furadantin); ATC J01XE01
+- [Potassium Chloride](https://www.synergice.com/molecule/potassium-chloride.html): Electrolyte replenisher; first approved Long-established; extended-release forms introduced to reduce gut injury; ATC A12BA01
+- [Prednisone](https://www.synergice.com/molecule/prednisone.html): Synthetic glucocorticoid (corticosteroid); first approved 1955, US FDA; ATC H02AB07
+- [Progesterone](https://www.synergice.com/molecule/progesterone.html): Progestogen (natural progesterone); first approved May 1998, US FDA (oral micronised capsules); ATC G03DA04
+- [Rosuvastatin](https://www.synergice.com/molecule/rosuvastatin.html): HMG-CoA reductase inhibitor (statin); first approved August 2003, US FDA; ATC C10AA07
+- [Tacrolimus](https://www.synergice.com/molecule/tacrolimus.html): Calcineurin inhibitor (macrolide immunosuppressant); first approved April 1994, US FDA; ATC L04AD02
+- [Tenofovir DF / Lamivudine / Dolutegravir](https://www.synergice.com/molecule/tenofovir-lamivudine-dolutegravir.html): Fixed-dose antiretroviral combination (two NRTIs plus one integrase inhibitor); first approved Dolutegravir August 2013, US FDA; generic TLD tentative approval 2017; ATC J05AR
+- [Tenofovir DF / Lamivudine / Efavirenz](https://www.synergice.com/molecule/tenofovir-lamivudine-efavirenz.html): Fixed-dose antiretroviral combination (two NRTIs plus one NNRTI); first approved Components 1995–2001, US FDA; single-tablet combination 2018 (Symfi); ATC J05AR11
+
+## Articles
+- [CTD, eCTD and ACTD: a short guide to dossier formats](https://www.synergice.com/articles/ctd-ectd-actd-dossier-formats.html): What the Common Technical Document, its electronic version and the ASEAN variant contain, and what they mean for a partner licensing a generic product.
+- [Five questions to ask before sourcing a finished dosage form](https://www.synergice.com/articles/questions-before-sourcing-a-finished-dosage-form.html): The questions regulatory and sourcing teams ask a manufacturer before commercial terms are discussed, and why each one matters.

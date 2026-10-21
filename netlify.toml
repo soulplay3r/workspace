@@ -1,0 +1,5 @@
+# Netlify demo deploy of the Synergice B2B site (pre-built, no build step).
+# Rebuild with: cd synergice && NETLIFY_FORMS=1 NOINDEX=1 python3 build.py && rm -rf netlify-site && cp -r dist netlify-site
+[build]
+  publish = "synergice/netlify-site"
+  command = ""
