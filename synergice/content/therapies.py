@@ -1,4 +1,6 @@
-"""Therapy areas shown as clickable tiles on the home and products pages.
+"""Therapy areas shown on the clickable therapy map (home and products pages).
+
+`map_name` is the shorter label used around the map.
 
 Each therapy page is generated from this list plus the molecules that point
 at it (see molecules_*.py). `intro` paragraphs are written for the page itself
@@ -8,6 +10,7 @@ so that every therapy page has its own crawlable copy, not boilerplate.
 THERAPIES = [
     {
         "slug": "cardiovascular",
+        "map_name": "Cardiovascular",
         "name": "Cardiovascular",
         "icon": "heart",
         "tagline": "Statins, antiplatelets, calcium channel blockers and beta blockers.",
@@ -22,6 +25,7 @@ THERAPIES = [
     },
     {
         "slug": "oncology",
+        "map_name": "Oncology",
         "name": "Oncology",
         "icon": "ribbon",
         "tagline": "Aromatase inhibitors, oral fluoropyrimidines and kinase inhibitors.",
@@ -36,6 +40,7 @@ THERAPIES = [
     },
     {
         "slug": "transplant-immunology",
+        "map_name": "Transplant & Immunology",
         "name": "Transplant & Immunology",
         "icon": "shield",
         "tagline": "Calcineurin inhibitors and antimetabolite immunosuppressants.",
@@ -50,6 +55,7 @@ THERAPIES = [
     },
     {
         "slug": "pain-inflammation",
+        "map_name": "Pain & Inflammation",
         "name": "Pain & Inflammation",
         "icon": "bolt",
         "tagline": "NSAIDs for pain and fever, and colchicine for gout.",
@@ -64,6 +70,7 @@ THERAPIES = [
     },
     {
         "slug": "central-nervous-system",
+        "map_name": "Nervous System",
         "name": "Central Nervous System",
         "icon": "neuron",
         "tagline": "Parkinson's disease, ADHD and narcolepsy.",
@@ -78,6 +85,7 @@ THERAPIES = [
     },
     {
         "slug": "hiv-antiretrovirals",
+        "map_name": "HIV & Antiretrovirals",
         "name": "HIV / Antiretrovirals",
         "icon": "virus",
         "tagline": "Fixed-dose combinations for first-line HIV treatment.",
@@ -92,6 +100,7 @@ THERAPIES = [
     },
     {
         "slug": "anti-malarials",
+        "map_name": "Anti-malarials",
         "name": "Anti-malarials",
         "icon": "mosquito",
         "tagline": "Artemisinin-based combination therapy.",
@@ -106,6 +115,7 @@ THERAPIES = [
     },
     {
         "slug": "anti-infectives",
+        "map_name": "Anti-infectives",
         "name": "Anti-infectives",
         "icon": "capsule",
         "tagline": "Antibacterials for urinary tract infections.",
@@ -120,6 +130,7 @@ THERAPIES = [
     },
     {
         "slug": "urology",
+        "map_name": "Urology",
         "name": "Urology",
         "icon": "drop",
         "tagline": "5-alpha reductase inhibitors for benign prostatic hyperplasia.",
@@ -134,6 +145,7 @@ THERAPIES = [
     },
     {
         "slug": "endocrine-corticosteroids",
+        "map_name": "Endocrine",
         "name": "Endocrine & Corticosteroids",
         "icon": "hexagon",
         "tagline": "Oral glucocorticoids.",
@@ -148,6 +160,7 @@ THERAPIES = [
     },
     {
         "slug": "vitamins-electrolytes",
+        "map_name": "Vitamins & Electrolytes",
         "name": "Vitamins & Electrolytes",
         "icon": "sun",
         "tagline": "Potassium supplementation and high-strength vitamin D.",
@@ -162,6 +175,7 @@ THERAPIES = [
     },
     {
         "slug": "womens-health",
+        "map_name": "Women's Health",
         "name": "Women's Health",
         "icon": "venus",
         "tagline": "Natural progesterone and hormone products.",

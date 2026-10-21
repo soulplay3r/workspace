@@ -3,7 +3,7 @@
 A simple, GEO/AEO-friendly website for **Synergice**, the B2B partnering platform of
 Strides Pharma Science. It replaces the agency's dense product pages with four
 things only: **Home, About us, Products (therapy area → molecule), Contact us**,
-plus an on-site **RAG assistant** and a short **Insights** section for answer engines.
+plus an on-site **RAG assistant**, **read-aloud** (text to speech) and a **Latest articles** section on the home page for answer engines.
 
 **Before going live, read [`CONTENT_REVIEW.md`](./CONTENT_REVIEW.md).** It lists the
 portfolio and company facts the Strides BD, regulatory and medical teams must confirm.
@@ -12,12 +12,12 @@ portfolio and company facts the Strides BD, regulatory and medical teams must co
 
 | Page | Purpose |
 |---|---|
-| `index.html` | Hero with molecule search, 12 clickable therapy-area tiles (Intas-style), how an enquiry works, FAQ |
-| `products.html` | Therapy tiles plus a filterable A–Z table of all molecules |
+| `index.html` | Hero with molecule search, the clickable **therapy map** (12 therapy areas around a molecule core, Intas-style), how an enquiry works, latest articles, FAQ |
+| `products.html` | The therapy map plus a filterable A–Z table of all molecules |
 | `therapy/<slug>.html` | One page per therapy area: molecule cards, summaries, comparison table, FAQ |
 | `molecule/<slug>.html` | One page per molecule, built to the agency's **Product Page Framework v2.0** (see below) |
 | `about.html`, `contact.html` | Company facts and the enquiry form: product, full name, email, company, country (all required, per the framework), **how did you hear about us**, and a message (**what would you like to know?**) |
-| `insights/*.html` | Two explainer articles (dossier formats; questions before sourcing) |
+| `articles/*.html` | Articles listed in the home page's **Latest articles** section, newest first (there is no separate Insights tab) |
 | `llms.txt`, `robots.txt`, `sitemap.xml` | Machine-readable map for AI crawlers and search engines |
 
 ### Product page (Framework v2.0)
@@ -74,6 +74,15 @@ Build-time settings (environment variables):
 | `FORM_ENDPOINT` | *(empty)* | URL that receives enquiry JSON (CRM webhook, HubSpot, Formspree…). Empty = preview mode: forms validate but say nothing was sent. |
 | `CHAT_ENDPOINT` | *(empty)* | URL of `api/chat.mjs`. Empty = the assistant answers from retrieval alone. |
 | `PRIVACY_POLICY_URL` | *(empty)* | Privacy policy linked from the consent checkbox. Empty = a placeholder `privacy.html` (noindex). |
+
+## Read aloud (text to speech)
+
+Molecule and article pages have a **Listen to this page** button (Pause / Resume / Stop) that
+reads the title, then each section, highlighting the paragraph being read. The assistant has a
+**Listen** button on every answer and a **Read aloud** switch that speaks new answers
+automatically. Both use the browser's built-in speech synthesis (`window.speechSynthesis`):
+no service, no API key, no cost. Voices depend on the visitor's device; the code prefers
+British, then Indian, then US English. Browsers without speech synthesis don't show the buttons.
 
 ## The assistant (RAG bot)
 

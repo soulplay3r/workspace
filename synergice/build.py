@@ -62,7 +62,7 @@ def ther_path(t):
 
 
 def art_path(a):
-    return f"insights/{a['slug']}.html"
+    return f"articles/{a['slug']}.html"
 
 
 def canonical(path):
@@ -132,7 +132,7 @@ def faq_ld(faqs):
 
 
 NAV = [("Home", "index.html"), ("About us", "about.html"), ("Products", "products.html"),
-       ("Insights", "insights.html"), ("Contact us", "contact.html")]
+       ("Contact us", "contact.html")]
 
 
 def shell(path, title, description, body, graph, active=None):
@@ -188,7 +188,7 @@ def shell(path, title, description, body, graph, active=None):
     </div>
     <div>
       <p class="foot-h">Company</p>
-      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{r}insights.html">Insights</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
+      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{r}index.html#articles">Articles</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
     </div>
   </div>
   <div class="wrap foot-legal">
@@ -278,12 +278,48 @@ def mol_card(m, r):
             f'<span class="mol-card-f">First approved {e(m["first_approval"].split(",")[0])}</span></a>')
 
 
-def therapy_tiles(r):
-    return '<div class="tiles">' + "".join(
-        f'<a class="tile" href="{r}{ther_path(t)}"><span class="tile-ico">{icon(t["icon"])}</span>'
-        f'<span class="tile-name">{e(t["name"])}</span>'
-        f'<span class="tile-count">{len(t["molecules"])} molecule{"s" if len(t["molecules"]) != 1 else ""} <span aria-hidden="true">→</span></span></a>'
-        for t in THERAPIES) + "</div>"
+MOLECULE_ART = ('<svg class="tmap-art" viewBox="0 0 120 120" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">'
+               '<path d="M34 30 52 50M52 50l26-14M52 50l14 22M66 72l24 4M66 72 56 92"/>'
+               '<circle cx="28" cy="24" r="8"/><circle cx="52" cy="50" r="11"/><circle cx="84" cy="32" r="7"/>'
+               '<circle cx="66" cy="72" r="7"/><circle cx="96" cy="77" r="7"/><circle cx="53" cy="98" r="9"/></svg>')
+
+
+def therapy_map(r, heading_id="therapy-map-h"):
+    """Clickable circular therapy map: one link per therapy area around a molecule core."""
+    import math
+    n = len(THERAPIES)
+    items = []
+    for i, t in enumerate(THERAPIES):
+        a = math.radians(-90 + 360 * i / n)
+        items.append(
+            f'<li style="--cx:{math.cos(a):.4f};--cy:{math.sin(a):.4f}"><a href="{r}{ther_path(t)}">'
+            f'<span class="tmap-ico">{icon(t["icon"])}</span><span class="tmap-name">{e(t["map_name"])}</span>'
+            f'<span class="tmap-go"><span class="tmap-go-w">Molecules</span> <span aria-hidden="true">→</span></span></a></li>')
+    return (f'<div class="tmap" role="navigation" aria-labelledby="{heading_id}">'
+            '<div class="tmap-disc" aria-hidden="true"><span class="ring r1"></span><span class="ring r2"></span>'
+            f'<span class="ring r3"></span><span class="tmap-core">{MOLECULE_ART}</span></div>'
+            f'<ul class="tmap-list">{"".join(items)}</ul></div>')
+
+
+def nice_date(iso):
+    import datetime
+    d = datetime.date.fromisoformat(iso)
+    return f"{d.day} {d.strftime('%B %Y')}"
+
+
+def article_cards(r):
+    arts = sorted(ARTICLES, key=lambda a: a["date"], reverse=True)
+    return '<div class="art-grid">' + "".join(
+        f'<a class="art-card" href="{r}{art_path(a)}"><span class="art-date">{nice_date(a["date"])}</span>'
+        f'<span class="art-t">{e(a["title"])}</span><span class="art-d">{e(a["description"])}</span>'
+        f'<span class="art-more">Read article <span aria-hidden="true">→</span></span></a>' for a in arts) + "</div>"
+
+
+LISTEN_BTN = ('<button class="btn btn-ghost listen" type="button" data-listen="{targets}" hidden>'
+              '<svg class="listen-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+              '<path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>'
+              '<span class="listen-label">Listen to this page</span></button>'
+              '<button class="btn btn-ghost listen-stop" type="button" hidden>Stop</button>')
 
 
 # ------------------------------------------------------------------- pages
@@ -363,7 +399,7 @@ def build_molecule(m):
     if m.get("image"):
         image = f'<img class="prod-img" src="{r}{e(m["image"])}" alt="{e(alt)}" width="800" height="800">'
     else:
-        image = (f'<div class="prod-img prod-img-ph" role="img" aria-label="{e(alt)}">{S_MARK}'
+        image = (f'<div class="prod-img prod-img-ph" role="img" aria-label="{e(alt)}">{icon(t["icon"], "ico ph-ico")}'
                  f'<span class="ph-name">{e(name)}</span><span class="ph-form">{e(m["form"])}</span></div>')
     sub = f'{e(m["klass"])} · {e(m["form"])}' + (" · Manufactured by Synergice" if confirmed else "")
     related = [MOL[s2] for s2 in m["related"][:3] if s2 in MOL]
@@ -376,6 +412,7 @@ def build_molecule(m):
 <header class="page-head mol-head">
   <h1>{e(name)}</h1>
   <p class="sub">{sub}</p>
+  <div class="actions">{LISTEN_BTN.format(targets="#about,#clinical,#product,#faq")}</div>
 </header>
 <section class="prod-top" aria-label="Product details">
   {image}
@@ -457,7 +494,7 @@ def build_therapy(t):
   <span class="tile-ico big">{icon(t["icon"])}</span>
   <div><p class="eyebrow">Therapy area</p><h1>{e(t["name"])}</h1><p class="sub">{e(t["tagline"])}</p></div>
 </header>
-<section class="answer"><p class="answer-label">In brief</p><p>Synergice lists {len(mols)} {e(t["name"].lower())} molecule{"s" if len(mols) != 1 else ""} from the Strides portfolio: {e(names)}. Select a molecule to read its approval history, mechanism of action and key facts, and to send an enquiry.</p></section>
+<section class="answer"><p class="answer-label">In brief</p><p>{e(t["name"])} molecules from the Strides portfolio on Synergice: {e(names)}. Select a molecule to read its approval history, mechanism of action and key facts, and to send an enquiry.</p></section>
 <section class="block"><h2>Molecules in {e(t["name"].lower())}</h2><div class="mol-grid">{"".join(mol_card(m, r) for m in mols)}</div></section>
 <div class="prose">
 <section class="block"><h2>About this therapy area</h2>{paras(t["intro"])}</section>
@@ -494,9 +531,9 @@ def build_products():
     body = f"""
 <div class="wrap">
 {crumbs_html(path, crumbs)}
-<header class="page-head"><p class="eyebrow">Products</p><h1>Molecules by therapy area</h1><p class="sub">{len(MOLECULES)} molecules across {len(THERAPIES)} therapy areas. Choose a therapy area, or search the full list below.</p></header>
+<header class="page-head"><p class="eyebrow">Products</p><h1>Molecules by therapy area</h1><p class="sub">Choose a therapy area on the map, or search the full list below.</p></header>
 <section class="answer"><p class="answer-label">In brief</p><p>Synergice lists molecules from the Strides Pharma Science portfolio in {len(THERAPIES)} therapy areas. Each molecule page explains when the molecule was first approved, how it works and its key facts, and includes an enquiry form for business partners.</p></section>
-<section class="block"><h2>Therapy areas</h2>{therapy_tiles(r)}</section>
+<section class="block"><h2 id="therapy-map-h">Therapy areas</h2>{therapy_map(r)}</section>
 <section class="block" id="all"><h2>All molecules A–Z</h2>
   <div class="filter"><label for="mol-filter">Filter molecules</label><input id="mol-filter" type="search" placeholder="Type a molecule, brand, class or therapy area" data-filter="#mol-table tbody tr"></div>
   <div class="table-wrap"><table class="list" id="mol-table"><thead><tr><th scope="col">Molecule</th><th scope="col">Therapy area</th><th scope="col">Drug class</th><th scope="col">First approved</th></tr></thead><tbody>{rows}</tbody></table></div>
@@ -511,7 +548,7 @@ def build_products():
                   {"@type": "ListItem", "position": i + 1, "name": m["name"], "url": canonical(mol_path(m))} for i, m in enumerate(MOLECULES)]}},
              faq_ld(faqs), crumbs_ld(crumbs)]
     return path, shell(path, "Products: molecules by therapy area | Synergice",
-                       f"Browse {len(MOLECULES)} molecules from the Strides portfolio across {len(THERAPIES)} therapy areas, with approval history, mechanism of action and enquiry forms.",
+                       f"Browse molecules from the Strides portfolio by therapy area, with approval history, mechanism of action and enquiry forms.",
                        body, graph, path)
 
 
@@ -536,15 +573,15 @@ def build_home():
         <ul id="hero-results" class="search-results" role="listbox" hidden></ul>
         <script type="application/json" id="molecule-index">{search_data}</script>
       </div>
-      <dl class="stats"><div><dt>Molecules listed</dt><dd>{len(MOLECULES)}</dd></div><div><dt>Therapy areas</dt><dd>{len(THERAPIES)}</dd></div><div><dt>Countries supplied by Strides</dt><dd>100+</dd></div></dl>
+      <dl class="stats"><div><dt>Therapy areas</dt><dd>{len(THERAPIES)}</dd></div><div><dt>Formulations in the partner portfolio</dt><dd>250+</dd></div><div><dt>Countries supplied by Strides</dt><dd>100+</dd></div></dl>
     </div>
-    <div class="hero-art" aria-hidden="true">{S_MARK}{S_MARK}{S_MARK}</div>
   </div>
 </section>
-<section class="wrap block" id="therapy-areas"><div class="sec-head"><h2>Browse by therapy area</h2><p>Select a therapy area to see its molecules.</p></div>{therapy_tiles(r)}</section>
+<section class="wrap block" id="therapy-areas"><div class="sec-head"><h2 id="therapy-map-h">Browse by therapy area</h2><p>Select a therapy area to see its molecules.</p></div>{therapy_map(r)}</section>
 <section class="band band-mint"><div class="wrap"><div class="sec-head"><h2>How an enquiry works</h2></div><ol class="steps">{steps}</ol></div></section>
 <section class="wrap block"><div class="sec-head"><h2>Molecules with recent Strides approvals</h2><p>US FDA approvals and portfolio additions reported by Strides.</p></div><div class="mol-grid">{"".join(mol_card(m, r) for m in featured)}</div></section>
 <section class="wrap block"><div class="sec-head"><h2>Who we work with</h2></div><div class="prose"><p>{e(HOME["about"])} <a href="about.html">More about Synergice</a></p></div><ul class="audiences">{aud}</ul></section>
+<section class="wrap block" id="articles"><div class="sec-head"><h2>Latest articles</h2><p>Practical guides for regulatory and sourcing teams.</p></div>{article_cards(r)}</section>
 <div class="wrap prose">{faq_html(HOME["faqs"])}</div>
 <section class="band band-dark"><div class="wrap cta"><div><h2>Have a molecule in mind?</h2><p>Send one short enquiry. The Synergice partnering team at Strides replies directly.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
 """
@@ -611,33 +648,15 @@ def build_contact():
                        body, graph, path)
 
 
-def build_insights_index():
-    path = "insights.html"
-    crumbs = [("Home", "index.html"), ("Insights", path)]
-    cards = "".join(f'<a class="art-card" href="{art_path(a)}"><span class="art-date">{e(a["date"])}</span><span class="art-t">{e(a["title"])}</span><span class="art-d">{e(a["description"])}</span></a>' for a in ARTICLES)
-    body = f"""
-<div class="wrap">
-{crumbs_html(path, crumbs)}
-<header class="page-head"><p class="eyebrow">Insights</p><h1>Insights for partners</h1><p class="sub">Short, practical guides for regulatory and sourcing teams.</p></header>
-<div class="art-grid">{cards}</div>
-</div>
-"""
-    graph = [{"@type": "CollectionPage", "@id": canonical(path) + "#webpage", "url": canonical(path), "name": "Insights for partners",
-              "isPartOf": {"@id": SITE["url"] + "/#website"}}, crumbs_ld(crumbs)]
-    return path, shell(path, "Insights for pharmaceutical partners | Synergice",
-                       "Practical guides for regulatory and sourcing teams: dossier formats, bioequivalence, stability and supplier evaluation.",
-                       body, graph, path)
-
-
 def build_article(a):
     path = art_path(a)
-    crumbs = [("Home", "index.html"), ("Insights", "insights.html"), (a["title"], path)]
+    crumbs = [("Home", "index.html"), ("Articles", "index.html#articles"), (a["title"], path)]
     secs = "".join(f'<section class="block"><h2>{e(h)}</h2>{paras(ps)}</section>' for h, ps in a["sections"])
     body = f"""
 <div class="wrap">
 {crumbs_html(path, crumbs)}
 <article class="prose article">
-<header class="page-head"><p class="eyebrow">Insights · {e(a["date"])}</p><h1>{e(a["title"])}</h1></header>
+<header class="page-head"><p class="eyebrow">Article · {nice_date(a["date"])}</p><h1>{e(a["title"])}</h1><div class="actions">{LISTEN_BTN.format(targets=".article")}</div></header>
 <section class="answer"><p class="answer-label">Summary</p><p>{e(a["summary"])}</p></section>
 {secs}
 {faq_html(a["faqs"])}
@@ -650,7 +669,7 @@ def build_article(a):
               "author": {"@id": SITE["url"] + "/#org"}, "publisher": {"@id": SITE["url"] + "/#org"},
               "isPartOf": {"@id": SITE["url"] + "/#website"}},
              faq_ld(a["faqs"]), crumbs_ld(crumbs)]
-    return path, shell(path, f"{a['title']} | Synergice Insights", a["description"], body, graph, "insights.html")
+    return path, shell(path, f"{a['title']} | Synergice", a["description"], body, graph, None)
 
 
 # --------------------------------------------- machine-readable companions
@@ -711,7 +730,7 @@ def llms_txt():
     lines += [f"- [{t['name']}]({canonical(ther_path(t))}): " + ", ".join(m["name"] for m in t["molecules"]) for t in THERAPIES]
     lines += ["", "## Molecules"]
     lines += [f"- [{m['name']}]({canonical(mol_path(m))}): {m['klass']}; first approved {m['first_approval']}; ATC {m['atc'].split(' ')[0]}" for m in MOLECULES]
-    lines += ["", "## Insights"]
+    lines += ["", "## Articles"]
     lines += [f"- [{a['title']}]({canonical(art_path(a))}): {a['description']}" for a in ARTICLES]
     return "\n".join(lines) + "\n"
 
@@ -767,7 +786,7 @@ def main():
     (DIST / "assets").mkdir(parents=True)
     shutil.copytree(ROOT / "static", DIST / "assets", dirs_exist_ok=True)
 
-    pages = [build_home(), build_about(), build_products(), build_contact(), build_insights_index()]
+    pages = [build_home(), build_about(), build_products(), build_contact()]
     pages += [build_therapy(t) for t in THERAPIES]
     pages += [build_molecule(m) for m in MOLECULES]
     pages += [build_article(a) for a in ARTICLES]
@@ -794,7 +813,7 @@ def main():
     print(f"{'words':>6}  page")
     for path, n in report:
         # The 600-1,200 word target applies to answer pages, not hubs or forms.
-        target = path.startswith(("molecule/", "insights/")) or path in ("index.html", "about.html")
+        target = path.startswith(("molecule/", "articles/")) or path in ("index.html", "about.html")
         flag = "  < 600" if target and n < 600 else ("  > 1200" if target and n > 1200 else "")
         print(f"{n:>6}  {path}{flag}")
 

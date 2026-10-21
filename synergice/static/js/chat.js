@@ -102,11 +102,14 @@
   var COMMERCIAL = /\b(price|pricing|cost|quote|moq|minimum order|lead time|supply|supplier|availability|available|stock|dossier|sample|registration|register|licen[cs]|distribut|tender|order|buy|purchase)\w*/i;
   var MEDICAL = /\b(should i|can i take|my (dose|doctor|child|mother|father|wife|husband|patient)|i am taking|i'm taking|side effects? (for|in) me|overdose|pregnan\w* .*take)\b/i;
 
+  var SPEAKER = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
   // ---------------------------------------------------------------- UI
   var fab = document.createElement("button");
   fab.className = "chat-fab";
   fab.type = "button";
-  fab.innerHTML = '<span class="dot" aria-hidden="true"></span>Ask Synergice';
+  fab.innerHTML = '<span class="fab-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg><span class="dot"></span></span>' +
+    '<span class="fab-text">Ask Synergice<small>Molecule assistant · can read aloud</small></span>';
   fab.setAttribute("aria-haspopup", "dialog");
 
   var panel = document.createElement("section");
@@ -117,6 +120,7 @@
   panel.innerHTML =
     '<div class="chat-head"><svg class="smark" viewBox="0 0 60 80" aria-hidden="true"><path d="M47 15 39 7H19L9 17v9l10 10 22 8 10 10v9L41 74H21l-8-8" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
     '<div><p class="chat-title">Synergice assistant</p><p class="chat-subtitle">Answers from our molecule library</p></div>' +
+    '<button class="chat-tts" type="button" aria-pressed="false" hidden>' + SPEAKER + 'Read aloud</button>' +
     '<button class="chat-close" type="button" aria-label="Close assistant">×</button></div>' +
     '<div class="chat-log" aria-live="polite"></div>' +
     '<form class="chat-form"><label class="vh" for="chat-input" hidden>Your question</label>' +
@@ -130,6 +134,31 @@
   var form = panel.querySelector(".chat-form");
   var field = panel.querySelector("#chat-input");
   var greeted = false;
+  var speech = window.SynergiceSpeech;
+  var canSpeak = !!(speech && speech.supported);
+  var tts = panel.querySelector(".chat-tts");
+  var autoRead = false;
+  if (canSpeak) {
+    tts.hidden = false;
+    tts.addEventListener("click", function () {
+      autoRead = !autoRead;
+      tts.setAttribute("aria-pressed", String(autoRead));
+      if (!autoRead) speech.stop();
+    });
+  }
+  // Adds a Listen button to a finished answer, and reads it if "Read aloud" is on.
+  var addListen = function (msg) {
+    if (!canSpeak) return;
+    var text = Array.prototype.map.call(msg.querySelectorAll(":scope > p"), function (p) { return p.textContent; }).join(" ");
+    if (!text.trim()) return;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "msg-listen";
+    b.innerHTML = SPEAKER + "Listen";
+    b.addEventListener("click", function () { speech.speak(text); });
+    msg.appendChild(b);
+    if (autoRead) speech.speak(text);
+  };
 
   var add = function (html, who) {
     var div = document.createElement("div");
@@ -166,7 +195,7 @@
     load();
     if (q) ask(q); else field.focus();
   };
-  var close = function () { panel.hidden = true; fab.hidden = false; fab.focus(); };
+  var close = function () { if (canSpeak) speech.stop(); panel.hidden = true; fab.hidden = false; fab.focus(); };
 
   fab.addEventListener("click", function () { open(); });
   panel.querySelector(".chat-close").addEventListener("click", close);
@@ -197,6 +226,8 @@
     if (!q) return;
     add("<p>" + esc(q) + "</p>", "user");
     var wait = add('<p class="typing">Looking that up…</p>', "bot");
+    var watch = new MutationObserver(function () { watch.disconnect(); addListen(wait); });
+    watch.observe(wait, { childList: true });
     load().then(function () {
       var hits = search(q);
       var prefix = "";

@@ -134,4 +134,130 @@
         .then(function () { btn.disabled = false; });
     });
   });
+
+  // ------------------------------------------------------- text to speech
+  // Browser speech synthesis (no service, no cost). Long text is read in
+  // sentence-sized chunks because some browsers stop long utterances early.
+  var synth = window.speechSynthesis;
+  var Speech = { supported: !!(synth && window.SpeechSynthesisUtterance) };
+  var token = 0, queue = [], lit = null, onDone = null, paused = false;
+  var pickVoice = function () {
+    var vs = synth.getVoices();
+    var prefs = ["en-GB", "en-IN", "en-US", "en"];
+    for (var i = 0; i < prefs.length; i++) {
+      for (var j = 0; j < vs.length; j++) {
+        if (vs[j].lang.replace("_", "-").indexOf(prefs[i]) === 0) return vs[j];
+      }
+    }
+    return null;
+  };
+  var split = function (text) {
+    var parts = text.replace(/\s+/g, " ").trim().match(/[^.!?;]+[.!?;]*\s*/g) || [];
+    var out = [], cur = "";
+    parts.forEach(function (p) {
+      if ((cur + p).length > 220 && cur) { out.push(cur.trim()); cur = ""; }
+      cur += p;
+    });
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  };
+  var highlight = function (el) {
+    if (lit) lit.classList.remove("speaking");
+    lit = el || null;
+    if (lit) {
+      lit.classList.add("speaking");
+      var r = lit.getBoundingClientRect();
+      if (r.top < 80 || r.bottom > window.innerHeight) lit.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  };
+  var finish = function () {
+    highlight(null);
+    paused = false;
+    var cb = onDone;
+    onDone = null;
+    if (cb) cb();
+  };
+  var next = function (my) {
+    if (my !== token) return;
+    if (!queue.length) { finish(); return; }
+    var it = queue.shift();
+    highlight(it.el);
+    var u = new SpeechSynthesisUtterance(it.text);
+    var v = pickVoice();
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "en-GB"; }
+    u.rate = 0.98;
+    u.onend = function () { next(my); };
+    u.onerror = function () { next(my); };
+    synth.speak(u);
+  };
+  Speech.speakItems = function (items, cb) {
+    Speech.stop();
+    var my = ++token;
+    onDone = cb || null;
+    items.forEach(function (it) {
+      split(it.text).forEach(function (t) { queue.push({ text: t, el: it.el }); });
+    });
+    next(my);
+  };
+  Speech.speak = function (text, cb) { Speech.speakItems([{ text: text }], cb); };
+  Speech.stop = function () {
+    token++;
+    queue = [];
+    if (Speech.supported) synth.cancel();
+    finish();
+  };
+  Speech.pause = function () { paused = true; synth.pause(); };
+  Speech.resume = function () { paused = false; synth.resume(); };
+  Speech.isPaused = function () { return paused; };
+  window.SynergiceSpeech = Speech;
+
+  // "Listen to this page" buttons: read the page title, then each heading,
+  // paragraph, list item and table row inside the target sections.
+  var readable = function (selectors) {
+    var items = [];
+    var h1 = document.querySelector("h1");
+    var sub = document.querySelector(".page-head .sub");
+    if (h1) items.push({ text: h1.textContent + ".", el: h1 });
+    if (sub) items.push({ text: sub.textContent.replace(/\s*·\s*/g, ", ") + ".", el: sub });
+    selectors.split(",").forEach(function (sel) {
+      var root = document.querySelector(sel.trim());
+      if (!root) return;
+      root.querySelectorAll("h2, h3, p, li, tr").forEach(function (el) {
+        if (el.closest(".actions, .meta, .page-head, form, nav")) return;
+        var text = el.tagName === "TR"
+          ? Array.prototype.map.call(el.children, function (c) { return c.textContent.trim(); }).join(": ")
+          : el.textContent.trim();
+        if (!text || el.closest("thead")) return;
+        if (/^H[23]$/.test(el.tagName) || el.tagName === "TR") text += ".";
+        items.push({ text: text, el: el.tagName === "H3" && el.closest("summary") ? el.closest("summary") : el });
+      });
+    });
+    return items;
+  };
+  document.querySelectorAll("button.listen").forEach(function (btn) {
+    if (!Speech.supported) return;
+    var label = btn.querySelector(".listen-label");
+    var stopBtn = btn.parentNode.querySelector(".listen-stop");
+    var state = "idle";
+    var reset = function () { state = "idle"; label.textContent = "Listen to this page"; stopBtn.hidden = true; };
+    btn.hidden = false;
+    btn.addEventListener("click", function () {
+      if (state === "idle") {
+        state = "playing";
+        label.textContent = "Pause";
+        stopBtn.hidden = false;
+        Speech.speakItems(readable(btn.getAttribute("data-listen")), reset);
+      } else if (state === "playing") {
+        state = "paused";
+        label.textContent = "Resume";
+        Speech.pause();
+      } else {
+        state = "playing";
+        label.textContent = "Pause";
+        Speech.resume();
+      }
+    });
+    stopBtn.addEventListener("click", function () { Speech.stop(); reset(); });
+    window.addEventListener("pagehide", function () { Speech.stop(); });
+  });
 })();
