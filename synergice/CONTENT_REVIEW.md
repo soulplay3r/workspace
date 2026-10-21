@@ -43,9 +43,18 @@ Nov 2022) and the prednisone strengths.
 - Group companies the brief mentioned (OneSource, Steriscience and others) are not named on the site; add them to About if wanted.
 - Office list on the contact page: add full addresses, phone and a partnering email.
 
-## 4. Before go-live (web team)
+## 4. Product page framework v2.0 fields
+
+- **Owned by legal:** `DISCLAIMER` in `content/pages.py` is draft wording; legal must replace it.
+- **Owned by marketing/QA:** `INFO_QUALITY` and `INFO_SUPPLY` (identical on every page).
+- **"We reply within one business day"** appears on every form and in FAQ Q5, as the framework specifies. Confirm the partnering team can meet it.
+- **"Manufactured by Synergice"** and FAQ Q1 ("Yes. Synergice manufactures…") only appear for `reported` and `agency` molecules. `confirm` molecules get neutral wording until BD confirms them.
+- **Empty product fields:** CAS number, availability status, pack configuration, regulatory filings and product images are empty for every molecule, so those cards are hidden. Strengths are filled only where Strides reported them or the agency draft listed them. Fill these in `content/framework_fields.py`. Images go in at 800×800 WebP under 120 KB, as the framework specifies.
+- **Pharmacokinetics tables and the longer molecule FAQs** from the first build are no longer rendered, because the framework has no slot for them. The text is still in `content/molecules_*.py` if you want it back.
+
+## 5. Before go-live (web team)
 
 - Replace the stand-in S mark (`S_MARK` in `build.py`, `static/img/synergice-mark.svg`) with the official Strides/Synergice logo SVGs.
 - Set `SITE_URL`, `FORM_ENDPOINT` and (optionally) `CHAT_ENDPOINT`, then rebuild.
-- Add a privacy notice link next to the consent checkbox.
+- Set `PRIVACY_POLICY_URL` to the published privacy policy (the consent checkbox links to a placeholder until then).
 - Submit `sitemap.xml` in Google Search Console and Bing Webmaster Tools (Bing feeds Copilot and ChatGPT search).

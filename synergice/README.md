@@ -15,10 +15,28 @@ portfolio and company facts the Strides BD, regulatory and medical teams must co
 | `index.html` | Hero with molecule search, 12 clickable therapy-area tiles (Intas-style), how an enquiry works, FAQ |
 | `products.html` | Therapy tiles plus a filterable A–Z table of all molecules |
 | `therapy/<slug>.html` | One page per therapy area: molecule cards, summaries, comparison table, FAQ |
-| `molecule/<slug>.html` | One page per molecule (760–940 words): in-brief answer, key facts, approval history, mechanism of action, approved uses, pharmacokinetics, FAQ, references, enquiry form |
-| `about.html`, `contact.html` | Company facts and the enquiry form (name, company, email, country, molecule, **how did you hear about us**, **what would you like to know**) |
+| `molecule/<slug>.html` | One page per molecule, built to the agency's **Product Page Framework v2.0** (see below) |
+| `about.html`, `contact.html` | Company facts and the enquiry form: product, full name, email, company, country (all required, per the framework), **how did you hear about us**, and a message (**what would you like to know?**) |
 | `insights/*.html` | Two explainer articles (dossier formats; questions before sourcing) |
 | `llms.txt`, `robots.txt`, `sitemap.xml` | Machine-readable map for AI crawlers and search engines |
+
+### Product page (Framework v2.0)
+
+Each molecule page follows the framework's fixed structure: header (name, drug class · dosage
+form · "Manufactured by Synergice"), a 1:1 product image slot, product field cards, About (two
+paragraphs), Clinical information (mechanism of action, indication), Product information
+(formulation, manufacturing and quality, supply and partnership), five FAQs (Q1–Q3 generated
+from product fields, Q4–Q5 fixed), related products, a legal disclaimer and the
+"Request this product" form.
+
+- Hand-written fields live in `content/framework_fields.py`; templated and fixed text in `build.py`
+  (`framework_text`) and `content/pages.py` (`INFO_QUALITY`, `INFO_SUPPLY`, `FAQ_FIXED`, `DISCLAIMER`).
+- `build.py` checks every field against the framework's word limits and prints any that fall outside.
+- Optional fields (`strengths`, `cas_number`, `availability`, `pack_config`, `regulatory_filings`,
+  `image`) hide their card when empty, as the framework specifies.
+- Kept from the original brief and added to the framework: **ATC code** and **First approved** cards,
+  an **Approval history** table under Clinical information, and **"How did you hear about us?"** in the form.
+- Not used: the optional "Markets and registration" module, per the brief's removal of market registration.
 
 Removed from the agency template on purpose: format & availability box, regulatory
 dossier, market registration, quality & compliance, packaging & supply, partnership models.
@@ -55,6 +73,7 @@ Build-time settings (environment variables):
 | `SITE_URL` | `https://www.synergice.com` | Canonical URLs, sitemap, JSON-LD |
 | `FORM_ENDPOINT` | *(empty)* | URL that receives enquiry JSON (CRM webhook, HubSpot, Formspree…). Empty = preview mode: forms validate but say nothing was sent. |
 | `CHAT_ENDPOINT` | *(empty)* | URL of `api/chat.mjs`. Empty = the assistant answers from retrieval alone. |
+| `PRIVACY_POLICY_URL` | *(empty)* | Privacy policy linked from the consent checkbox. Empty = a placeholder `privacy.html` (noindex). |
 
 ## The assistant (RAG bot)
 

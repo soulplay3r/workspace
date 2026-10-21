@@ -99,8 +99,8 @@
           ok = false;
           first = first || el;
           var label = form.querySelector('label[for="' + el.id + '"]');
-          var name = label ? label.textContent.replace(/\?$/, "") : "This field";
-          setErr(field, el.type === "checkbox" ? "Please tick to confirm." :
+          var name = label ? label.textContent.replace(/\s*\*\s*$/, "").replace(/\?$/, "") : "This field";
+          setErr(field, el.type === "checkbox" ? "Please tick to agree." : el.tagName === "SELECT" ? name + ": choose an option." :
             el.type === "email" && el.value.trim() ? "Enter an email address like name@company.com." :
             name + " is required.");
         }

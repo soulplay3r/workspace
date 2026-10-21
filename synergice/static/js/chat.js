@@ -44,7 +44,7 @@
   var INTENTS = [
     [/\b(work|works|mechanism|moa|act|acts|action|target|inhibit)/i, ["mechanism", "action"], "mechanism"],
     [/\b(approv|when|launch|history|first|discover|year|generic)/i, ["approval", "approved", "history"], "approval"],
-    [/\b(used|use|uses|indicat|treat|for what|condition)/i, ["used", "indication", "uses"], "uses"],
+    [/\b(used|use|uses|indicat|treat|for what|condition)/i, ["used", "indication", "indicated"], "indication"],
     [/\b(half|pharmacokinetic|pk|metaboli|absorb|absorption|eliminat|bioavailab|cyp)/i, ["pharmacokinetics", "metabolism", "half"], "pharmacokinetics"],
     [/\b(class|atc|code|reference|brand|originator|dosage form|route)/i, ["class", "atc", "reference"], "key facts"],
     [/\b(enquir|inquir|contact|reach|email)/i, ["enquiry", "enquire", "contact"], "enquiry"]
@@ -79,6 +79,7 @@
       return { d: x.d, s: s };
     }).filter(function (r) { return r.s > 0; }).sort(function (a, b2) { return b2.s - a.s; });
     hits.named = named;
+    hits.sections = sections;
     return hits;
   };
 
@@ -232,6 +233,12 @@
             '<p><a href="' + ROOT + 'contact.html">Contact the partnering team</a> or <a href="' + ROOT + 'products.html">browse all molecules</a>.</p>';
           return;
         }
+        if (prefix) {
+          var medPage = hits.named.length && hits.filter(function (h) { return h.d.m === hits.named[0]; })[0];
+          wait.innerHTML = "<p>I can't give personal medical advice. Please speak to a doctor or pharmacist about your own treatment.</p>" +
+            (medPage ? '<p>For general product information, see the <a href="' + esc(ROOT + medPage.d.u.split("#")[0]) + '">' + esc(medPage.d.m) + " page</a>.</p>" : "");
+          return;
+        }
         if (commercial) {
           var page = hits.named.length && hits.filter(function (h) { return h.d.m === hits.named[0]; })[0];
           wait.innerHTML = prefix + tail + (page
@@ -240,6 +247,13 @@
           return;
         }
         var top = hits[0];
+        var tl = top.d.t.toLowerCase();
+        if (hits.named.length && hits.sections.length && !hits.sections.some(function (sec) { return tl.indexOf(sec) !== -1; })) {
+          var molPage = hits.filter(function (h) { return h.d.m === hits.named[0]; })[0];
+          wait.innerHTML = prefix + "<p>That detail isn't covered on our " + esc(hits.named[0]) + " page. Our business development team can answer it.</p>" +
+            '<p><a href="' + enquiryLink() + '">Send an enquiry</a>' + (molPage ? ' or read the <a href="' + esc(ROOT + molPage.d.u.split("#")[0]) + '">' + esc(hits.named[0]) + " page</a>" : "") + ".</p>";
+          return;
+        }
         var parts = ["<p>" + esc(bestSentences(top.d.x, q, 2)) + "</p>"];
         var second = hits[1];
         if (second && second.s >= top.s * 0.6 && second.d.m === top.d.m && second.d.u !== top.d.u) {

@@ -183,3 +183,70 @@ ARTICLES = [
         ],
     },
 ]
+
+
+# ---------------------------------------------------------------------------
+# Product page framework v2.0: text that is IDENTICAL on every product page.
+# INFO_QUALITY and INFO_SUPPLY are owned by marketing/QA; DISCLAIMER by legal.
+
+INFO_QUALITY = (
+    "Products are manufactured under Good Manufacturing Practice, with in-process controls at each stage of "
+    "production and finished-product release testing of every batch against its approved specification. "
+    "Stability is established under ICH conditions for the climatic zones of the markets supplied. "
+    "Site-specific regulatory status, including the inspecting authorities and the most recent inspection "
+    "outcome, is confirmed on enquiry."
+)
+
+INFO_SUPPLY = (
+    "Synergice works with partners through contract supply, dossier-based partnerships and volume agreements, "
+    "structured around each partner's market and authorisation position. Forecasts, lead times and order "
+    "quantities are agreed per market. For questions about a specific market, registration or commercial "
+    "terms, use the enquiry form on this page."
+)
+
+FAQ_FIXED = [
+    ("Can Synergice supply this product to my market?",
+     "Registration status varies by market. Tell us your country in the enquiry form on this page and our "
+     "business development team will confirm whether the product is registered there or can be supplied "
+     "through another route."),
+    ("How do I request a quotation?",
+     "Use the enquiry form on this page. Enter your details, your country and the strengths or pack sizes you "
+     "need. We reply within one business day."),
+]
+
+DISCLAIMER = (
+    "This page is intended for pharmaceutical industry professionals and business partners only and is not "
+    "directed at patients or the general public. Product information is provided for business discussion, may "
+    "differ from the approved labelling in your country and is not medical advice. Dosage forms, strengths and "
+    "availability vary by market, and not every product is registered or available in every territory. Brand "
+    "names mentioned are trademarks of their respective owners."
+)
+
+RESPONSE_PROMISE = "We reply within one business day."
+
+COUNTRIES = [
+    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia",
+    "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium",
+    "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria",
+    "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad",
+    "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus",
+    "Czechia", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+    "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji",
+    "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala",
+    "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hong Kong", "Hungary", "Iceland", "India",
+    "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
+    "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
+    "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta",
+    "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia",
+    "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand",
+    "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau",
+    "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
+    "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines",
+    "Samoa", "San Marino", "São Tomé and Príncipe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles",
+    "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa",
+    "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+    "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago",
+    "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom",
+    "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen",
+    "Zambia", "Zimbabwe",
+]

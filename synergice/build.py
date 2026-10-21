@@ -24,8 +24,9 @@ from therapies import THERAPIES  # noqa: E402
 from molecules_a import MOLECULES_A  # noqa: E402
 from molecules_b import MOLECULES_B  # noqa: E402
 from molecules_c import MOLECULES_C  # noqa: E402
-from pages import (ABOUT, ARTICLES, COMPANY_FACTS, CONTACT, HEAR_ABOUT,  # noqa: E402
-                   HOME)
+from framework_fields import FIELDS  # noqa: E402
+from pages import (ABOUT, ARTICLES, COMPANY_FACTS, CONTACT, COUNTRIES, DISCLAIMER,  # noqa: E402
+                   FAQ_FIXED, HEAR_ABOUT, HOME, INFO_QUALITY, INFO_SUPPLY, RESPONSE_PROMISE)
 
 SITE = {
     "name": "Synergice",
@@ -34,12 +35,15 @@ SITE = {
     "parent_url": "https://www.strides.com",
     "form_endpoint": os.environ.get("FORM_ENDPOINT", ""),
     "chat_endpoint": os.environ.get("CHAT_ENDPOINT", ""),
+    "privacy_url": os.environ.get("PRIVACY_POLICY_URL", ""),  # empty = placeholder privacy.html
     "updated": "2026-10-21",
     "updated_label": "21 October 2026",
 }
 
 DIST = ROOT / "dist"
 MOLECULES = sorted(MOLECULES_A + MOLECULES_B + MOLECULES_C, key=lambda m: m["name"].lower())
+for _m in MOLECULES:
+    _m.update(FIELDS[_m["slug"]])
 MOL = {m["slug"]: m for m in MOLECULES}
 THER = {t["slug"]: t for t in THERAPIES}
 for t in THERAPIES:
@@ -232,28 +236,37 @@ def paras(ps):
     return "".join(f"<p>{e(p)}</p>" for p in ps)
 
 
-def enquiry_form(path, molecule=None, heading="Send an enquiry", intro=None):
+def enquiry_form(path, molecule=None, heading="Request this product", intro=None):
+    r = "../" * path.count("/")
     uid = molecule["slug"] if molecule else "general"
-    opts = '<option value="">Select a molecule (optional)</option>' + "".join(
-        f'<option{" selected" if molecule and m["slug"] == molecule["slug"] else ""}>{e(m["name"])}</option>'
-        for m in MOLECULES) + "<option>A molecule not listed here</option>"
+    req = '<span class="req" aria-hidden="true">*</span>'
+    if molecule:
+        product = (f'<div class="field"><p class="label">Product enquired about</p><p class="product-locked">{e(molecule["name"])}</p>'
+                   f'<input type="hidden" name="product" value="{e(molecule["name"])}"></div>')
+    else:
+        opts = '<option value="">Select a product (optional)</option>' + "".join(
+            f"<option>{e(m['name'])}</option>" for m in MOLECULES) + "<option>A product not listed here</option>"
+        product = f'<div class="field"><label for="{uid}-product">Product enquired about</label><select id="{uid}-product" name="product">{opts}</select></div>'
+    countries = '<option value="">Select your country</option>' + "".join(f"<option>{e(c)}</option>" for c in COUNTRIES)
     hear = '<option value="">Select one</option>' + "".join(f"<option>{e(h)}</option>" for h in HEAR_ABOUT)
     endpoint = f' data-endpoint="{e(SITE["form_endpoint"])}"' if SITE["form_endpoint"] else ""
+    privacy = SITE["privacy_url"] or f"{r}privacy.html"
     intro_html = f'<p class="form-intro">{e(intro)}</p>' if intro else ""
     return f"""<form class="enquiry" id="enquiry-{uid}" novalidate{endpoint}>
   <h2 class="form-h">{e(heading)}</h2>{intro_html}
+  {product}
   <div class="grid2">
-    <div class="field"><label for="{uid}-name">Full name</label><input id="{uid}-name" name="name" autocomplete="name" required></div>
-    <div class="field"><label for="{uid}-company">Company</label><input id="{uid}-company" name="company" autocomplete="organization"></div>
-    <div class="field"><label for="{uid}-email">Work email</label><input id="{uid}-email" name="email" type="email" autocomplete="email" required></div>
-    <div class="field"><label for="{uid}-country">Country or market</label><input id="{uid}-country" name="country" autocomplete="country-name"></div>
-    <div class="field"><label for="{uid}-molecule">Molecule</label><select id="{uid}-molecule" name="molecule">{opts}</select></div>
-    <div class="field"><label for="{uid}-hear">How did you hear about us?</label><select id="{uid}-hear" name="heard_about" required>{hear}</select></div>
+    <div class="field"><label for="{uid}-name">Full name {req}</label><input id="{uid}-name" name="name" autocomplete="name" required></div>
+    <div class="field"><label for="{uid}-email">Email ID {req}</label><input id="{uid}-email" name="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="{uid}-company">Company name {req}</label><input id="{uid}-company" name="company" autocomplete="organization" required></div>
+    <div class="field"><label for="{uid}-country">Country {req}</label><select id="{uid}-country" name="country" autocomplete="country-name" required>{countries}</select></div>
   </div>
-  <div class="field"><label for="{uid}-message">What would you like to know?</label><textarea id="{uid}-message" name="message" rows="4" required placeholder="For example: registration position in Kenya, available strengths, dossier format"></textarea></div>
-  <div class="field check"><input id="{uid}-consent" name="consent" type="checkbox" required><label for="{uid}-consent">I agree that Strides Pharma Science may use these details to respond to my enquiry.</label></div>
+  <div class="field"><label for="{uid}-hear">How did you hear about us? {req}</label><select id="{uid}-hear" name="heard_about" required>{hear}</select></div>
+  <div class="field"><label for="{uid}-message">Message: what would you like to know?</label><textarea id="{uid}-message" name="message" rows="4" placeholder="For example: strengths and pack sizes for Kenya, registration position, quotation"></textarea></div>
+  <div class="field check"><input id="{uid}-consent" name="consent" type="checkbox" required><label for="{uid}-consent">I agree that Synergice may use these details to respond to my enquiry, in line with the <a href="{e(privacy)}">privacy policy</a>. {req}</label></div>
   <input type="hidden" name="page" value="{e(path)}">
-  <button class="btn" type="submit">Send enquiry</button>
+  <button class="btn" type="submit">Submit enquiry</button>
+  <p class="form-note">{e(RESPONSE_PROMISE)}</p>
   <p class="form-status" role="status" aria-live="polite"></p>
 </form>"""
 
@@ -274,90 +287,157 @@ def therapy_tiles(r):
 
 
 # ------------------------------------------------------------------- pages
+def article_for(phrase):
+    return "an" if phrase[:1].lower() in "aeiou" or phrase.startswith("HMG") else "a"
+
+
+def first_sentence(text):
+    return re.split(r"(?<=[.!?])\s+", text, maxsplit=1)[0]
+
+
+def framework_text(m):
+    """Templated framework fields, built from the product fields."""
+    name, lname = m["name"], lower_first(m["name"])
+    form = lower_first(m["form"])
+    st = m.get("strengths")
+    pack = m.get("pack_config")
+    confirmed = m["portfolio"] != "confirm"
+    if confirmed:
+        manufacture = (f"Synergice manufactures {lname} as {form}" + (f", in strengths of {st}" if st else "") + ". "
+                       "Production takes place within the Strides Pharma Science manufacturing network under Good "
+                       "Manufacturing Practice, and every batch is released against its approved specification. The product "
+                       "is supplied to marketing authorisation holders, distributors and licensing partners; the forms, "
+                       "strengths and packs available for each market are confirmed on enquiry.")
+        q1 = (f"Yes. Synergice manufactures {lname} as {form}" + (f", in {st}." if st else ". Available strengths are confirmed on enquiry."))
+        q3 = (f"{name} is available as {form}" + (f", in {st}." if st else ".") +
+              (f" Pack configuration: {pack}." if pack else " Strengths and pack configurations for your market are confirmed on enquiry."))
+    else:
+        manufacture = (f"{name} is listed on Synergice for partnering enquiries. Where Synergice supplies it, production "
+                       "takes place within the Strides Pharma Science manufacturing network under Good Manufacturing "
+                       "Practice, with every batch tested and released against its approved specification. Current manufacture, "
+                       "dosage forms, strengths and pack configurations for your market are confirmed on enquiry.")
+        q1 = (f"{name} is listed for partnering enquiries. Contact our business development team through the form on "
+              "this page to confirm current manufacture, dosage forms and strengths for your market.")
+        q3 = (f"Dosage forms and strengths of {lname} for your market are confirmed on enquiry. "
+              f"The reference product is presented as {form}.")
+    formulation = (f"{name} is presented as {form}" + (f", in strengths of {st}" if st else "") + ". " +
+                   (f"Pack configuration: {pack}. " if pack else
+                    "Pack configurations, such as blister and bottle presentations, are set per market and confirmed on enquiry. ") +
+                   "Artwork, labelling and language variants are developed for the destination market. Full composition, "
+                   "including excipients, is shared under confidentiality during technical evaluation.")
+    kl = lower_first(m["klass"])
+    q2 = f"{name} is classified as {article_for(kl)} {kl}. {first_sentence(m['overview_molecule'])}"
+    faqs = [(f"Does Synergice manufacture {lname}?", q1),
+            (f"What drug class is {lname}?", q2),
+            ("What strengths and dosage forms are available?", q3)] + FAQ_FIXED
+    return {"manufacture": manufacture, "formulation": formulation, "faqs": faqs}
+
+
+def spec_cards(m, r):
+    t = THER[m["therapy"]]
+    atc = m["atc"].split(" ")[0]
+    cards = [
+        ("Therapeutic category", f'<a href="{r}{ther_path(t)}">{e(t["name"])}</a>'),
+        ("Dosage form", e(m["form"])),
+        ("Strength", e(m.get("strengths") or "")),
+        ("CAS number", e(m.get("cas_number") or "")),
+        ("Availability status", e(m.get("availability") or "")),
+        ("Pack configuration", e(m.get("pack_config") or "")),
+        ("Regulatory filings available", "".join(f'<span class="tag">{e(x)}</span>' for x in m.get("regulatory_filings") or [])),
+        ("ATC code", f'<a href="https://atcddd.fhi.no/atc_ddd_index/?code={e(atc)}" rel="noopener">{e(m["atc"])}</a>'),
+        ("First approved", e(m["first_approval"])),
+    ]
+    # Framework rule: an empty field hides its row.
+    return "".join(f'<div class="spec"><dt>{k}</dt><dd>{v}</dd></div>' for k, v in cards if v)
+
+
 def build_molecule(m):
     path = mol_path(m)
     r = "../"
     t = THER[m["therapy"]]
-    short = f" ({m['short']})" if m.get("short") else ""
-    crumbs = [("Home", "index.html"), ("Products", "products.html"), (t["name"], ther_path(t)), (m["name"], path)]
-    atc_link = m["atc"].split(" ")[0]
-    facts = [
-        ("Generic name", e(m["name"]) + e(short)),
-        ("Drug class", e(m["klass"])),
-        ("ATC code", f'<a href="https://atcddd.fhi.no/atc_ddd_index/?code={e(atc_link)}" rel="noopener">{e(m["atc"])}</a>'),
-        ("Reference product", e(m["reference"])),
-        ("First approval", e(m["first_approval"])),
-        ("Route", e(m["route"])),
-        ("Dosage form", e(m["form"])),
-        ("Therapy area", f'<a href="{r}{ther_path(t)}">{e(t["name"])}</a>'),
-    ]
-    if m.get("portfolio_note"):
-        facts.append(("Strides portfolio", e(m["portfolio_note"])))
-    lname = lower_first(m["name"])
-    faqs = m["faqs"] + [(
-        f"How do I enquire about sourcing {lname} from Synergice?",
-        f"Use the enquiry form on this page. Give your name, work email, how you heard about us and what you want to know about {lname}, such as your market and the strengths you need. The Synergice partnering team at Strides replies directly.")]
-    sourcing = [
-        f"Synergice is the B2B partnering platform of Strides Pharma Science Limited. If you are evaluating {lname} for your market, the partnering team can tell you what Strides holds for this molecule, where it is registered and how a partnership could work, from dossier licensing to contract supply.",
-        "Send an enquiry from this page with your market and the information you need first. Detailed documentation, such as dossier status, stability and bioequivalence summaries and manufacturing site approvals, is shared directly during evaluation.",
-    ]
-    related = [MOL[s] for s in m["related"] if s in MOL]
-    toc = [("facts", "Key facts"), ("overview", "Overview"), ("history", "Approval history"),
-           ("moa", "Mechanism of action"), ("uses", "Approved uses"), ("pk", "Pharmacokinetics"),
-           ("faq", "FAQs"), ("enquire", "Enquire")]
+    fw = framework_text(m)
+    name, lname = m["name"], lower_first(m["name"])
+    confirmed = m["portfolio"] != "confirm"
+    crumbs = [("Home", "index.html"), ("Products", "products.html"), (t["name"], ther_path(t)), (name, path)]
+    alt = m.get("image_alt") or f"{name} {lower_first(m['form'])}"
+    if m.get("image"):
+        image = f'<img class="prod-img" src="{r}{e(m["image"])}" alt="{e(alt)}" width="800" height="800">'
+    else:
+        image = (f'<div class="prod-img prod-img-ph" role="img" aria-label="{e(alt)}">{S_MARK}'
+                 f'<span class="ph-name">{e(name)}</span><span class="ph-form">{e(m["form"])}</span></div>')
+    sub = f'{e(m["klass"])} · {e(m["form"])}' + (" · Manufactured by Synergice" if confirmed else "")
+    related = [MOL[s2] for s2 in m["related"][:3] if s2 in MOL]
+    toc = [("about", f"About {name}"), ("clinical", "Clinical information"), ("product", "Product information"),
+           ("faq", "FAQs"), ("enquire", "Request this product")]
     dq = e(f"How does {lname} work?")
     body = f"""
 <div class="wrap">
 {crumbs_html(path, crumbs)}
 <header class="page-head mol-head">
-  <p class="eyebrow"><a href="{r}{ther_path(t)}">{e(t["name"])}</a></p>
-  <h1>{e(m["name"])}{e(short)}</h1>
-  <p class="sub">{e(m["klass"])} · ATC {e(m["atc"].split(" ")[0])}</p>
-  <div class="actions"><a class="btn" href="#enquire">Enquire about {e(lname)}</a><button class="btn btn-ghost" type="button" data-chat-open data-q="{dq}">Ask the assistant</button></div>
+  <h1>{e(name)}</h1>
+  <p class="sub">{sub}</p>
 </header>
+<section class="prod-top" aria-label="Product details">
+  {image}
+  <dl class="spec-grid">{spec_cards(m, r)}</dl>
+</section>
 <div class="mol-layout">
 <article class="prose">
-  <section class="answer" aria-label="In brief"><p class="answer-label">In brief</p><p>{e(m["summary"])}</p></section>
-  <section class="block" id="facts"><h2>Key facts</h2>{kv_table(facts)}</section>
-  <section class="block" id="overview"><h2>Overview</h2>{paras(m["overview"])}</section>
-  <section class="block" id="history"><h2>Approval history</h2><p>When {e(lname)} was first approved and the milestones that shaped its use.</p>{timeline_table(m["timeline"])}</section>
-  <section class="block" id="moa"><h2>Mechanism of action</h2>{paras(m["moa"])}</section>
-  <section class="block" id="uses"><h2>Approved uses</h2><p>Indications in reference prescribing information. Approved uses differ between markets; local labelling applies.</p><ul class="ticks">{"".join(f"<li>{e(i)}</li>" for i in m["indications"])}</ul></section>
-  <section class="block" id="pk"><h2>Pharmacokinetics at a glance</h2>{kv_table([(k, e(v)) for k, v in m["pk"]], "facts pk")}</section>
-  <section class="block" id="sourcing"><h2>Sourcing {e(lname)} through Synergice</h2>{paras(sourcing)}</section>
-  {faq_html(faqs)}
-  <section class="block refs" id="refs"><h2>References</h2><ul>
-    <li><a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query={e(m["slug"].split("-")[0])}" rel="noopener">US prescribing information (DailyMed)</a></li>
-    <li><a href="https://atcddd.fhi.no/atc_ddd_index/?code={e(atc_link)}" rel="noopener">WHO ATC/DDD index: {e(atc_link)}</a></li>
-    <li><a href="https://www.ema.europa.eu/en/search?search_api_fulltext={e(m["slug"].split("-")[0])}" rel="noopener">European Medicines Agency</a></li>
-  </ul><p class="meta">Content summarises public prescribing information for business partners. Last updated {SITE["updated_label"]}.</p></section>
+  <section class="block" id="about"><h2>About {e(name)}</h2><p>{e(m["overview_molecule"])}</p><p>{e(fw["manufacture"])}</p></section>
+  <section class="block" id="clinical"><h2>Clinical information</h2>
+    <h3 id="moa">Mechanism of action</h3><p>{e(m["moa_short"])}</p>
+    <h3 id="indication">Indication</h3><p>{e(m["indication"])}</p>
+    <h3 id="history">Approval history</h3>{timeline_table(m["timeline"])}
+    <p class="meta">Sources: <a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query={e(m["slug"].split("-")[0])}" rel="noopener">US prescribing information (DailyMed)</a> · <a href="https://www.ema.europa.eu/en/search?search_api_fulltext={e(m["slug"].split("-")[0])}" rel="noopener">European Medicines Agency</a></p>
+  </section>
+  <section class="block" id="product"><h2>Product information</h2>
+    <h3 id="formulation">Formulation and presentation</h3><p>{e(fw["formulation"])}</p>
+    <h3 id="quality">Manufacturing and quality</h3><p>{e(INFO_QUALITY)}</p>
+    <h3 id="supply">Supply and partnership</h3><p>{e(INFO_SUPPLY)}</p>
+  </section>
+  {faq_html(fw["faqs"])}
 </article>
 <aside class="side">
-  <nav class="toc" aria-label="On this page"><p class="toc-h">On this page</p>{"".join(f'<a href="#{i}">{l}</a>' for i, l in toc)}</nav>
-  <div class="side-card"><p class="side-h">Interested in {e(lname)}?</p><p>Ask the partnering team about registration, dossier status and supply for your market.</p><a class="btn btn-block" href="#enquire">Send an enquiry</a></div>
+  <nav class="toc" aria-label="On this page"><p class="toc-h">On this page</p>{"".join(f'<a href="#{i}">{e(l)}</a>' for i, l in toc)}</nav>
+  <div class="side-card"><p class="side-h">Request this product</p><p>Send an enquiry to our business development team. {e(RESPONSE_PROMISE)}</p><a class="btn btn-block" href="#enquire">Submit an enquiry</a><button class="btn btn-ghost btn-block" type="button" data-chat-open data-q="{dq}">Ask the assistant</button></div>
 </aside>
 </div>
+<section class="block"><h2>Related products</h2><div class="mol-grid">{"".join(mol_card(x, r) for x in related)}</div><p class="more"><a href="{r}{ther_path(t)}">All {e(t["name"].lower())} products →</a></p></section>
+<section class="disclaimer" aria-label="Disclaimer"><p class="disclaimer-h">Disclaimer</p><p>{e(DISCLAIMER)}</p><p>Last updated {SITE["updated_label"]}.</p></section>
 </div>
-<section class="band band-mint" id="enquire"><div class="wrap narrow">{enquiry_form(path, m, f"Enquire about {lname}", "Tell us who you are and what you want to know. Your enquiry goes directly to the Synergice partnering team.")}</div></section>
-<section class="wrap block"><h2>Related molecules</h2><div class="mol-grid">{"".join(mol_card(x, r) for x in related)}</div><p class="more"><a href="{r}{ther_path(t)}">All {e(t["name"].lower())} molecules →</a></p></section>
+<section class="band band-mint" id="enquire"><div class="wrap narrow">{enquiry_form(path, m, "Request this product", "Send an enquiry to our business development team.")}</div></section>
 """
     graph = [
         {"@type": "MedicalWebPage", "@id": canonical(path) + "#webpage", "url": canonical(path),
-         "name": f"{m['name']}: approval history, mechanism of action and key facts",
-         "description": m["summary"], "lastReviewed": SITE["updated"], "dateModified": SITE["updated"],
+         "name": f"{name}: drug class, mechanism of action and supply",
+         "description": m["overview_molecule"], "lastReviewed": SITE["updated"], "dateModified": SITE["updated"],
          "inLanguage": "en", "isPartOf": {"@id": SITE["url"] + "/#website"},
          "about": {"@id": canonical(path) + "#drug"}, "publisher": {"@id": SITE["url"] + "/#org"},
          "audience": {"@type": "Audience", "audienceType": "Pharmaceutical business partners"}},
-        {"@type": "Drug", "@id": canonical(path) + "#drug", "name": m["name"],
-         "nonProprietaryName": m["name"], "alternateName": [a for a in m["aka"][:4]],
+        {"@type": "Drug", "@id": canonical(path) + "#drug", "name": name, "nonProprietaryName": name,
+         "alternateName": m["aka"][:4], "description": m["overview_molecule"],
          "drugClass": {"@type": "DrugClass", "name": m["klass"]},
-         "mechanismOfAction": m["moa"][0], "administrationRoute": m["route"], "dosageForm": m["form"],
+         "mechanismOfAction": m["moa_short"], "administrationRoute": m["route"], "dosageForm": m["form"],
          "code": {"@type": "MedicalCode", "code": m["atc"].split(" ")[0], "codingSystem": "ATC"},
          "url": canonical(path)},
-        faq_ld(faqs), crumbs_ld(crumbs)]
-    title = f"{m['name']}{short}: approval history, mechanism of action and key facts | Synergice"
-    desc = m["summary"][:155].rsplit(" ", 1)[0] + "…" if len(m["summary"]) > 158 else m["summary"]
+        faq_ld(fw["faqs"]), crumbs_ld(crumbs)]
+    title = f"{name}: drug class, mechanism of action and supply | Synergice"
+    ov = m["overview_molecule"]
+    desc = ov[:155].rsplit(" ", 1)[0] + "…" if len(ov) > 158 else ov
     return path, shell(path, title, desc, body, graph, "products.html")
+
+
+def build_privacy():
+    path = "privacy.html"
+    body = f"""
+<div class="wrap prose">
+{crumbs_html(path, [("Home", "index.html"), ("Privacy policy", path)])}
+<header class="page-head"><h1>Privacy policy</h1></header>
+<p>This page is a placeholder. The privacy policy for enquiries submitted through this site is supplied by Strides Pharma Science legal. Set PRIVACY_POLICY_URL when building the site to link the enquiry forms to the published policy instead.</p>
+</div>
+"""
+    html = shell(path, "Privacy policy | Synergice", "Privacy policy for enquiries submitted to Synergice.", body, [], None)
+    return path, html.replace('content="index, follow, max-snippet:-1"', 'content="noindex"')
 
 
 def build_therapy(t):
@@ -583,17 +663,20 @@ def search_index():
 
     for m in MOLECULES:
         u, n = mol_path(m), m["name"]
-        k = " Also known as: " + ", ".join(m["aka"]) + "."
-        add(f"{n}: in brief", u + "#facts", m["summary"] + k, n, m["aka"] + ([m["short"]] if m.get("short") else []))
-        add(f"{n}: key facts", u + "#facts",
-            f"{n}. Class: {m['klass']}. ATC code: {m['atc']}. Reference product: {m['reference']}. First approval: {m['first_approval']}. Route: {m['route']}. Dosage form: {m['form']}. Therapy area: {THER[m['therapy']]['name']}." + (" " + m["portfolio_note"] if m.get("portfolio_note") else ""), n)
-        add(f"{n}: overview", u + "#overview", " ".join(m["overview"]), n)
-        add(f"{n}: approval history", u + "#history", " ".join(f"{y}: {t}" for y, t in m["timeline"]), n)
-        add(f"{n}: mechanism of action", u + "#moa", " ".join(m["moa"]), n)
-        add(f"{n}: approved uses", u + "#uses", f"{n} is used for: " + "; ".join(m["indications"]) + ".", n)
-        add(f"{n}: pharmacokinetics", u + "#pk", "; ".join(f"{k2}: {v}" for k2, v in m["pk"]) + ".", n)
-        for q, a in m["faqs"]:
-            add(f"{n}: {q}", u + "#faq", f"{q} {a}", n)
+        fw = framework_text(m)
+        aka = m["aka"] + ([m["short"]] if m.get("short") else [])
+        add(f"{n}: about", u + "#about", m["overview_molecule"] + " " + fw["manufacture"] + " Also known as: " + ", ".join(aka) + ".", n, aka)
+        add(f"{n}: key facts", u,
+            f"{n}. Drug class: {m['klass']}. ATC code: {m['atc']}. Reference product: {m['reference']}. First approved: {m['first_approval']}. Dosage form: {m['form']}."
+            + (f" Strengths: {m['strengths']}." if m.get("strengths") else "") + f" Therapeutic category: {THER[m['therapy']]['name']}.", n)
+        add(f"{n}: mechanism of action", u + "#moa", m["moa_short"], n)
+        add(f"{n}: indication", u + "#indication", m["indication"], n)
+        add(f"{n}: approval history", u + "#history", f"When was {n} approved? " + " ".join(f"{y}: {t}" for y, t in m["timeline"]), n)
+        add(f"{n}: formulation and presentation", u + "#formulation", fw["formulation"], n)
+    add("Manufacturing and quality", "products.html", INFO_QUALITY)
+    add("Supply and partnership", "products.html", INFO_SUPPLY)
+    for q, a in FAQ_FIXED:
+        add(q, "contact.html", f"{q} {a}")
     for t in THERAPIES:
         add(f"{t['name']} therapy area", ther_path(t), " ".join(t["intro"]) + " Molecules: " + ", ".join(m["name"] for m in t["molecules"]) + ".")
         for q, a in t["faqs"]:
@@ -647,6 +730,29 @@ def sitemap(paths):
 
 
 # --------------------------------------------------------------- word count
+LIMITS = {"overview_molecule": (60, 90), "moa_short": (30, 60), "indication": (30, 60),
+          "manufacture": (50, 80), "formulation": (40, 70)}
+
+
+def words(text):
+    return len(re.findall(r"[A-Za-z0-9][\w'’\-/.]*", text))
+
+
+def framework_checks():
+    """Build notes: report any framework field outside its word range."""
+    out = []
+    for label, text, lo, hi in [("INFO_QUALITY", INFO_QUALITY, 50, 80), ("INFO_SUPPLY", INFO_SUPPLY, 40, 70)]:
+        if not lo <= words(text) <= hi:
+            out.append(f"{label}: {words(text)} words (target {lo}-{hi})")
+    for m in MOLECULES:
+        fw = framework_text(m)
+        for key, (lo, hi) in LIMITS.items():
+            n = words(m.get(key) or fw.get(key, ""))
+            if not lo <= n <= hi:
+                out.append(f"{m['slug']}.{key}: {n} words (target {lo}-{hi})")
+    return out
+
+
 def visible_words(html):
     main = html.split('<main id="main">', 1)[1].split("</main>", 1)[0]
     main = re.sub(r"<script.*?</script>", " ", main, flags=re.S)
@@ -665,9 +771,10 @@ def main():
     pages += [build_therapy(t) for t in THERAPIES]
     pages += [build_molecule(m) for m in MOLECULES]
     pages += [build_article(a) for a in ARTICLES]
+    extra = [build_privacy()]
 
     report = []
-    for path, html in pages:
+    for path, html in pages + extra:
         out = DIST / path
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(html, encoding="utf-8")
@@ -679,7 +786,11 @@ def main():
     (DIST / "robots.txt").write_text(robots_txt(), encoding="utf-8")
     (DIST / "sitemap.xml").write_text(sitemap([p for p, _ in pages]), encoding="utf-8")
 
-    print(f"Built {len(pages)} pages into {DIST.relative_to(ROOT)}/")
+    print(f"Built {len(pages) + len(extra)} pages into {DIST.relative_to(ROOT)}/")
+    problems = framework_checks()
+    print("Framework v2.0 word limits: " + ("all within range" if not problems else f"{len(problems)} outside range"))
+    for p in problems:
+        print("  " + p)
     print(f"{'words':>6}  page")
     for path, n in report:
         # The 600-1,200 word target applies to answer pages, not hubs or forms.
