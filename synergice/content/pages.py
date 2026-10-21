@@ -103,7 +103,7 @@ CONTACT = {
 
 HEAR_ABOUT = [
     "Search engine (Google, Bing)",
-    "AI assistant (ChatGPT, Perplexity, Gemini, Copilot, Claude)",
+    "AI assistant (ChatGPT, Perplexity, Gemini, Copilot)",
     "LinkedIn",
     "Trade show or conference",
     "Industry directory or database",

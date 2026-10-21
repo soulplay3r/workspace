@@ -36,6 +36,10 @@ SITE = {
     "form_endpoint": os.environ.get("FORM_ENDPOINT", ""),
     "chat_endpoint": os.environ.get("CHAT_ENDPOINT", ""),
     "privacy_url": os.environ.get("PRIVACY_POLICY_URL", ""),  # empty = placeholder privacy.html
+    # NETLIFY_FORMS=1: enquiries are captured by Netlify Forms (Site > Forms).
+    "netlify_forms": os.environ.get("NETLIFY_FORMS") == "1",
+    # NOINDEX=1: demo/staging build that search engines and AI crawlers must not index.
+    "noindex": os.environ.get("NOINDEX") == "1",
     "updated": "2026-10-21",
     "updated_label": "21 October 2026",
 }
@@ -156,7 +160,7 @@ def shell(path, title, description, body, graph, active=None):
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(description)}">
 <meta property="og:url" content="{canonical(path)}">
-<meta name="robots" content="index, follow, max-snippet:-1">
+<meta name="robots" content="{"noindex, nofollow" if SITE["noindex"] else "index, follow, max-snippet:-1"}">
 <link rel="icon" href="{r}assets/img/synergice-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -250,6 +254,11 @@ def enquiry_form(path, molecule=None, heading="Request this product", intro=None
     countries = '<option value="">Select your country</option>' + "".join(f"<option>{e(c)}</option>" for c in COUNTRIES)
     hear = '<option value="">Select one</option>' + "".join(f"<option>{e(h)}</option>" for h in HEAR_ABOUT)
     endpoint = f' data-endpoint="{e(SITE["form_endpoint"])}"' if SITE["form_endpoint"] else ""
+    netlify = ""
+    if SITE["netlify_forms"]:
+        endpoint = ' name="enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field"'
+        netlify = ('<input type="hidden" name="form-name" value="enquiry">'
+                   '<p hidden><label>Leave this empty <input name="bot-field"></label></p>')
     privacy = SITE["privacy_url"] or f"{r}privacy.html"
     intro_html = f'<p class="form-intro">{e(intro)}</p>' if intro else ""
     return f"""<form class="enquiry" id="enquiry-{uid}" novalidate{endpoint}>
@@ -264,7 +273,7 @@ def enquiry_form(path, molecule=None, heading="Request this product", intro=None
   <div class="field"><label for="{uid}-hear">How did you hear about us? {req}</label><select id="{uid}-hear" name="heard_about" required>{hear}</select></div>
   <div class="field"><label for="{uid}-message">Message: what would you like to know?</label><textarea id="{uid}-message" name="message" rows="4" placeholder="For example: strengths and pack sizes for Kenya, registration position, quotation"></textarea></div>
   <div class="field check"><input id="{uid}-consent" name="consent" type="checkbox" required><label for="{uid}-consent">I agree that Synergice may use these details to respond to my enquiry, in line with the <a href="{e(privacy)}">privacy policy</a>. {req}</label></div>
-  <input type="hidden" name="page" value="{e(path)}">
+  <input type="hidden" name="page" value="{e(path)}">{netlify}
   <button class="btn" type="submit">Submit enquiry</button>
   <p class="form-note">{e(RESPONSE_PROMISE)}</p>
   <p class="form-status" role="status" aria-live="polite"></p>
@@ -462,6 +471,23 @@ def build_molecule(m):
     ov = m["overview_molecule"]
     desc = ov[:155].rsplit(" ", 1)[0] + "…" if len(ov) > 158 else ov
     return path, shell(path, title, desc, body, graph, "products.html")
+
+
+def build_404():
+    path = "404.html"
+    body = f"""
+<div class="wrap prose" style="padding-block:64px">
+<p class="eyebrow">Page not found</p>
+<h1>We couldn't find that page</h1>
+<p>The page may have moved. Browse molecules by therapy area, search from the home page, or ask the assistant.</p>
+<div class="actions"><a class="btn" href="/products.html">Browse products</a><a class="btn btn-ghost" href="/index.html">Go to the home page</a></div>
+</div>
+"""
+    html = shell(path, "Page not found | Synergice", "Page not found.", body, [], None)
+    # Served from any URL depth, so asset and nav links must be root-absolute.
+    html = html.replace('href="assets/', 'href="/assets/').replace('src="assets/', 'src="/assets/').replace('data-root=""', 'data-root="/"')
+    html = re.sub(r'href="(?!https?:|/|#|mailto:)([^"]+)"', r'href="/\1"', html)
+    return path, html.replace('content="index, follow, max-snippet:-1"', 'content="noindex"')
 
 
 def build_privacy():
@@ -736,6 +762,8 @@ def llms_txt():
 
 
 def robots_txt():
+    if SITE["noindex"]:
+        return "User-agent: *\nDisallow: /\n"
     bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User",
             "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot-Extended", "Bingbot", "Googlebot"]
     return ("# Answer engines and AI assistants are welcome to read and cite this site.\n"
@@ -790,7 +818,7 @@ def main():
     pages += [build_therapy(t) for t in THERAPIES]
     pages += [build_molecule(m) for m in MOLECULES]
     pages += [build_article(a) for a in ARTICLES]
-    extra = [build_privacy()]
+    extra = [build_privacy(), build_404()]
 
     report = []
     for path, html in pages + extra:

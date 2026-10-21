@@ -112,6 +112,24 @@
       data.submitted_at = new Date().toISOString();
       var endpoint = form.getAttribute("data-endpoint");
       status.className = "form-status";
+      if (form.hasAttribute("data-netlify")) {
+        var btnN = form.querySelector("button[type=submit]");
+        btnN.disabled = true;
+        status.textContent = "Sending…";
+        fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(new FormData(form)).toString() })
+          .then(function (res) {
+            if (!res.ok) throw new Error(res.status);
+            form.reset();
+            status.className = "form-status ok";
+            status.textContent = "Thank you. Your enquiry has been sent to the Synergice partnering team.";
+          })
+          .catch(function () {
+            status.className = "form-status note";
+            status.textContent = "Your enquiry could not be sent. Check your connection and try again.";
+          })
+          .then(function () { btnN.disabled = false; });
+        return;
+      }
       if (!endpoint) {
         status.className = "form-status note";
         status.textContent = "Preview build: the enquiry form is not connected to an inbox yet, so this enquiry was not sent. Set FORM_ENDPOINT when building the site to connect it.";

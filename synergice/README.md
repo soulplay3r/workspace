@@ -42,6 +42,19 @@ Removed from the agency template on purpose: format & availability box, regulato
 dossier, market registration, quality & compliance, packaging & supply, partnership models.
 Those details are shared with partners after an enquiry.
 
+## Deploy a demo to Netlify
+
+```bash
+cd synergice
+NETLIFY_FORMS=1 NOINDEX=1 python3 build.py
+cd dist && zip -r ../synergice-b2b-site.zip . && cd ..
+```
+
+Drag the zip (or the `dist` folder) onto https://app.netlify.com/drop. `NETLIFY_FORMS=1` sends
+enquiries to Netlify Forms (enable form detection under Site configuration › Forms, then
+redeploy once); `NOINDEX=1` keeps the demo out of search engines and AI crawlers. Leave
+`NOINDEX` unset for the real launch so the GEO/AEO set-up can work.
+
 ## GEO / AEO features
 
 - **Answer-first:** every page opens with an "In brief" block that answers the page's main question in 2–3 sentences.
@@ -73,6 +86,8 @@ Build-time settings (environment variables):
 | `SITE_URL` | `https://www.synergice.com` | Canonical URLs, sitemap, JSON-LD |
 | `FORM_ENDPOINT` | *(empty)* | URL that receives enquiry JSON (CRM webhook, HubSpot, Formspree…). Empty = preview mode: forms validate but say nothing was sent. |
 | `CHAT_ENDPOINT` | *(empty)* | URL of `api/chat.mjs`. Empty = the assistant answers from retrieval alone. |
+| `NETLIFY_FORMS` | *(unset)* | `1` = forms post to Netlify Forms instead of `FORM_ENDPOINT` |
+| `NOINDEX` | *(unset)* | `1` = demo build: `noindex` on every page and a `robots.txt` that blocks all crawlers |
 | `PRIVACY_POLICY_URL` | *(empty)* | Privacy policy linked from the consent checkbox. Empty = a placeholder `privacy.html` (noindex). |
 
 ## Read aloud (text to speech)
