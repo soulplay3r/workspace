@@ -240,44 +240,92 @@ def paras(ps):
     return "".join(f"<p>{e(p)}</p>" for p in ps)
 
 
-def enquiry_form(path, molecule=None, heading="Request this product", intro=None):
+DIAL_CODES = ["+91 India", "+1 USA / Canada", "+44 United Kingdom", "+41 Switzerland", "+49 Germany", "+33 France",
+              "+39 Italy", "+34 Spain", "+31 Netherlands", "+971 UAE", "+966 Saudi Arabia", "+27 South Africa",
+              "+254 Kenya", "+234 Nigeria", "+65 Singapore", "+61 Australia", "+81 Japan", "+86 China",
+              "+55 Brazil", "+52 Mexico", "Other"]
+DOSAGE_FORMS = ["Tablets", "Film-coated tablets", "Extended-release tablets", "Dispersible tablets", "Capsules",
+                "Soft gelatin capsules", "Oral solution", "Powder for oral solution", "Other / not sure"]
+TARGET_MARKETS = ["United States", "Canada", "European Union", "United Kingdom", "Switzerland", "Australia / New Zealand",
+                  "Latin America", "Middle East & North Africa", "Sub-Saharan Africa", "India", "Asia-Pacific",
+                  "CIS countries", "Multiple markets"]
+REGULATORY = ["US FDA (ANDA)", "EU (EMA / national authorities)", "UK MHRA", "Health Canada", "Australia TGA",
+              "WHO Prequalification", "Country-specific (emerging markets)", "Not sure yet"]
+PURPOSES = ["Dossier licensing", "Contract supply against my authorisation", "Supply with registration support",
+            "Private label / own brand", "Tender or institutional supply", "Samples for evaluation", "Other"]
+
+
+def enquiry_form(path, molecule=None, heading="Request for Quotation", intro=None):
+    """Request for Quotation form (modelled on Dr. Reddy's API RFQ, adapted to finished dosage forms)."""
     r = "../" * path.count("/")
     uid = molecule["slug"] if molecule else "general"
     req = '<span class="req" aria-hidden="true">*</span>'
-    if molecule:
-        product = (f'<div class="field"><p class="label">Product enquired about</p><p class="product-locked">{e(molecule["name"])}</p>'
-                   f'<input type="hidden" name="product" value="{e(molecule["name"])}"></div>')
-    else:
-        opts = '<option value="">Select a product (optional)</option>' + "".join(
-            f"<option>{e(m['name'])}</option>" for m in MOLECULES) + "<option>A product not listed here</option>"
-        product = f'<div class="field"><label for="{uid}-product">Product enquired about</label><select id="{uid}-product" name="product">{opts}</select></div>'
-    countries = '<option value="">Select your country</option>' + "".join(f"<option>{e(c)}</option>" for c in COUNTRIES)
-    hear = '<option value="">Select one</option>' + "".join(f"<option>{e(h)}</option>" for h in HEAR_ABOUT)
+    opt = lambda items, ph: f'<option value="">{e(ph)}</option>' + "".join(f"<option>{e(i)}</option>" for i in items)
+    products = '<option value="">Select a product</option>' + "".join(
+        f'<option{" selected" if molecule and m["slug"] == molecule["slug"] else ""}>{e(m["name"])}</option>'
+        for m in MOLECULES) + "<option>A product not listed here</option>"
+    dial = "".join(f'<option value="{e(d.split(" ")[0])}">{e(d)}</option>' for d in DIAL_CODES)
+    strengths = [x.strip() for x in (molecule.get("strengths") or "").split(",") if x.strip()] if molecule else []
+    datalist = (f'<datalist id="{uid}-strengths">' + "".join(f'<option value="{e(x)}">' for x in strengths) + "</datalist>") if strengths else ""
     endpoint = f' data-endpoint="{e(SITE["form_endpoint"])}"' if SITE["form_endpoint"] else ""
-    netlify = ""
+    netlify = captcha = ""
     if SITE["netlify_forms"]:
-        endpoint = ' name="enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field"'
+        # Native POST so Netlify's built-in reCAPTCHA ("I'm not a robot") can run; Netlify injects the widget.
+        endpoint = (f' name="enquiry" method="POST" action="{r}thank-you.html" data-netlify="true"'
+                    ' data-netlify-recaptcha="true" netlify-honeypot="bot-field"')
         netlify = ('<input type="hidden" name="form-name" value="enquiry">'
                    '<p hidden><label>Leave this empty <input name="bot-field"></label></p>')
+        captcha = '<div class="captcha" data-netlify-recaptcha="true"></div>'
     privacy = SITE["privacy_url"] or f"{r}privacy.html"
-    intro_html = f'<p class="form-intro">{e(intro)}</p>' if intro else ""
-    return f"""<form class="enquiry" id="enquiry-{uid}" novalidate{endpoint}>
-  <h2 class="form-h">{e(heading)}</h2>{intro_html}
-  {product}
+    intro = intro or f"Get in touch with us by filling out the form below. Our business development team will reach out to you. {RESPONSE_PROMISE}"
+    return f"""<form class="enquiry rfq" id="enquiry-{uid}" novalidate{endpoint}>
+  <h2 class="form-h">{e(heading)}</h2><p class="form-intro">{e(intro)}</p>
   <div class="grid2">
     <div class="field"><label for="{uid}-name">Full name {req}</label><input id="{uid}-name" name="name" autocomplete="name" required></div>
-    <div class="field"><label for="{uid}-email">Email ID {req}</label><input id="{uid}-email" name="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="{uid}-email">Work email {req}</label><input id="{uid}-email" name="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="{uid}-phone">Phone</label><div class="phone"><select id="{uid}-dial" name="dial_code" aria-label="Country code">{dial}</select><input id="{uid}-phone" name="phone" type="tel" autocomplete="tel-national" placeholder="Mobile number"></div></div>
+    <div class="field"><label for="{uid}-country">Country {req}</label><select id="{uid}-country" name="country" autocomplete="country-name" required>{opt(COUNTRIES, "Select your country")}</select></div>
     <div class="field"><label for="{uid}-company">Company name {req}</label><input id="{uid}-company" name="company" autocomplete="organization" required></div>
-    <div class="field"><label for="{uid}-country">Country {req}</label><select id="{uid}-country" name="country" autocomplete="country-name" required>{countries}</select></div>
+    <div class="field"><label for="{uid}-hear">How did you hear about us? {req}</label><select id="{uid}-hear" name="heard_about" required>{opt(HEAR_ABOUT, "Select one")}</select></div>
   </div>
-  <div class="field"><label for="{uid}-hear">How did you hear about us? {req}</label><select id="{uid}-hear" name="heard_about" required>{hear}</select></div>
-  <div class="field"><label for="{uid}-message">Message: what would you like to know?</label><textarea id="{uid}-message" name="message" rows="4" placeholder="For example: strengths and pack sizes for Kenya, registration position, quotation"></textarea></div>
+  <details class="rfq-sec"{" open" if molecule else ""}><summary>Product requirement details</summary>
+    <div class="grid2">
+      <div class="field"><label for="{uid}-product">Product</label><select id="{uid}-product" name="product">{products}</select></div>
+      <div class="field"><label for="{uid}-form">Dosage form</label><select id="{uid}-form" name="dosage_form">{opt(DOSAGE_FORMS, "Select dosage form")}</select></div>
+      <div class="field"><label for="{uid}-strength">Strength</label><input id="{uid}-strength" name="strength" placeholder="{e(", ".join(strengths) or "e.g. 10 mg")}"{f' list="{uid}-strengths"' if strengths else ""}>{datalist}</div>
+      <div class="field"><label for="{uid}-market">Target market</label><select id="{uid}-market" name="target_market">{opt(TARGET_MARKETS, "Select target market")}</select></div>
+    </div>
+  </details>
+  <details class="rfq-sec"><summary>Business details</summary>
+    <div class="grid2">
+      <div class="field"><label for="{uid}-reg">Regulatory requirements</label><select id="{uid}-reg" name="regulatory">{opt(REGULATORY, "Select regulatory requirements")}</select></div>
+      <div class="field"><label for="{uid}-purpose">Purpose</label><select id="{uid}-purpose" name="purpose">{opt(PURPOSES, "Select purpose")}</select></div>
+      <div class="field"><label for="{uid}-endcust">End customer information</label><input id="{uid}-endcust" name="end_customer" placeholder="e.g. hospital tenders, retail pharmacy chain"></div>
+      <div class="field"><label for="{uid}-qty">Quantity required for evaluation</label><input id="{uid}-qty" name="evaluation_quantity" placeholder="e.g. 3 batches, 10,000 tablets"></div>
+      <div class="field"><label for="{uid}-annual">Estimated annual commercial demand</label><input id="{uid}-annual" name="annual_demand" placeholder="e.g. 5 million tablets"></div>
+    </div>
+  </details>
+  <div class="field"><label for="{uid}-message">Message: what would you like to know?</label><textarea id="{uid}-message" name="message" rows="4" placeholder="For example: registration position, pack sizes, quotation for 3 strengths"></textarea></div>
   <div class="field check"><input id="{uid}-consent" name="consent" type="checkbox" required><label for="{uid}-consent">I agree that Synergice may use these details to respond to my enquiry, in line with the <a href="{e(privacy)}">privacy policy</a>. {req}</label></div>
   <input type="hidden" name="page" value="{e(path)}">{netlify}
-  <button class="btn" type="submit">Submit enquiry</button>
-  <p class="form-note">{e(RESPONSE_PROMISE)}</p>
+  {captcha}
+  <button class="btn btn-wide" type="submit">Submit</button>
   <p class="form-status" role="status" aria-live="polite"></p>
 </form>"""
+
+
+def build_thank_you():
+    path = "thank-you.html"
+    body = f"""
+<div class="wrap prose" style="padding-block:64px">
+<p class="eyebrow">Request received</p>
+<h1>Thank you for your enquiry</h1>
+<p>Your request for quotation has been sent to the Synergice business development team. {e(RESPONSE_PROMISE)}</p>
+<div class="actions"><a class="btn" href="products.html">Browse more products</a><a class="btn btn-ghost" href="index.html">Back to the home page</a></div>
+</div>
+"""
+    html = shell(path, "Thank you | Synergice", "Enquiry received.", body, [], None)
+    return path, html.replace('content="index, follow, max-snippet:-1"', 'content="noindex"')
 
 
 def mol_card(m, r):
@@ -451,7 +499,7 @@ def build_molecule(m):
 <section class="block"><h2>Related products</h2><div class="mol-grid">{"".join(mol_card(x, r) for x in related)}</div><p class="more"><a href="{r}{ther_path(t)}">All {e(t["name"].lower())} products →</a></p></section>
 <section class="disclaimer" aria-label="Disclaimer"><p class="disclaimer-h">Disclaimer</p><p>{e(DISCLAIMER)}</p><p>Last updated {SITE["updated_label"]}.</p></section>
 </div>
-<section class="band band-mint" id="enquire"><div class="wrap narrow">{enquiry_form(path, m, "Request this product", "Send an enquiry to our business development team.")}</div></section>
+<section class="band band-mint" id="enquire"><div class="wrap narrow">{enquiry_form(path, m)}</div></section>
 """
     graph = [
         {"@type": "MedicalWebPage", "@id": canonical(path) + "#webpage", "url": canonical(path),
@@ -608,6 +656,7 @@ def build_home():
 <section class="wrap block"><div class="sec-head"><h2>Molecules with recent Strides approvals</h2><p>US FDA approvals and portfolio additions reported by Strides.</p></div><div class="mol-grid">{"".join(mol_card(m, r) for m in featured)}</div></section>
 <section class="wrap block"><div class="sec-head"><h2>Who we work with</h2></div><div class="prose"><p>{e(HOME["about"])} <a href="about.html">More about Synergice</a></p></div><ul class="audiences">{aud}</ul></section>
 <section class="wrap block" id="articles"><div class="sec-head"><h2>Latest articles</h2><p>Practical guides for regulatory and sourcing teams.</p></div>{article_cards(r)}</section>
+<section class="band band-mint" id="rfq"><div class="wrap narrow">{enquiry_form(path, None, "Request for Quotation")}</div></section>
 <div class="wrap prose">{faq_html(HOME["faqs"])}</div>
 <section class="band band-dark"><div class="wrap cta"><div><h2>Have a molecule in mind?</h2><p>Send one short enquiry. The Synergice partnering team at Strides replies directly.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
 """
@@ -660,7 +709,7 @@ def build_contact():
     <section class="block"><h2>What to include</h2><ul class="ticks">{"".join(f"<li>{e(i)}</li>" for i in CONTACT["include"])}</ul></section>
     <section class="block"><h2>Offices</h2>{kv_table([(k, e(v)) for k, v in CONTACT["offices"]])}</section>
   </div>
-  <div class="form-card">{enquiry_form(path, None, "Send an enquiry")}</div>
+  <div class="form-card">{enquiry_form(path)}</div>
 </div>
 <section class="block"><h2>What happens after you enquire</h2><ol class="steps">{nxt}</ol></section>
 <div class="prose">{faq_html(CONTACT["faqs"])}</div>
@@ -818,7 +867,7 @@ def main():
     pages += [build_therapy(t) for t in THERAPIES]
     pages += [build_molecule(m) for m in MOLECULES]
     pages += [build_article(a) for a in ARTICLES]
-    extra = [build_privacy(), build_404()]
+    extra = [build_privacy(), build_404(), build_thank_you()]
 
     report = []
     for path, html in pages + extra:

@@ -401,3 +401,18 @@ th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-botto
 .listen-ico { width: 20px; height: 20px; }
 .speaking { background: #fff9d9; box-shadow: 0 0 0 8px #fff9d9; border-radius: 4px; transition: background .2s; }
 .art-more { margin-top: auto; padding-top: 8px; font-weight: 600; color: var(--green-medium); }
+
+/* Request for Quotation form */
+.rfq .form-h { font-size: var(--step-3); }
+.phone { display: flex; gap: 8px; }
+.phone select { flex: 0 0 auto; width: 8.5rem; }
+.phone input { flex: 1; min-width: 0; }
+.rfq-sec { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px 0; }
+.rfq-sec + .rfq-sec { border-top: 0; }
+.rfq-sec > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 14px 0; font-size: var(--step-1); font-weight: 600; color: var(--charcoal); }
+.rfq-sec > summary::-webkit-details-marker { display: none; }
+.rfq-sec > summary::after { content: ""; width: 10px; height: 10px; border-right: 2.5px solid var(--green-medium); border-bottom: 2.5px solid var(--green-medium); transform: rotate(45deg); margin-right: 6px; transition: transform .15s; }
+.rfq-sec[open] > summary::after { transform: rotate(-135deg); }
+.rfq-sec > .grid2 { padding-bottom: 18px; }
+.btn-wide { align-self: stretch !important; padding-block: 16px; font-size: 1.1rem; border-radius: 999px; }
+.captcha:empty { display: none; }

@@ -105,7 +105,17 @@
             name + " is required.");
         }
       });
-      if (!ok) { first.focus(); return; }
+      if (!ok) {
+        var sec = first.closest("details");
+        if (sec) sec.open = true;
+        first.focus();
+        return;
+      }
+      if (form.hasAttribute("data-netlify-recaptcha")) {
+        // Netlify's reCAPTCHA needs a normal (non-script) submission; it then shows thank-you.html.
+        form.submit();
+        return;
+      }
 
       var data = {};
       new FormData(form).forEach(function (v, k) { data[k] = v; });
