@@ -25,7 +25,7 @@ from molecules_a import MOLECULES_A  # noqa: E402
 from molecules_b import MOLECULES_B  # noqa: E402
 from molecules_c import MOLECULES_C  # noqa: E402
 from framework_fields import FIELDS  # noqa: E402
-from pages import (ABOUT, ABOUT_CATEGORIES, ABOUT_OFFERS, ARTICLES, COMPANY_FACTS, CONTACT, COUNTRIES, DISCLAIMER,  # noqa: E402
+from pages import (ABOUT, ARTICLES, COMPANY_FACTS, CONTACT, COUNTRIES, DISCLAIMER,  # noqa: E402
                    FAQ_FIXED, HEAR_ABOUT, HOME, INFO_QUALITY, INFO_SUPPLY, RESPONSE_PROMISE)
 
 SITE = {
@@ -134,7 +134,7 @@ LANGUAGES = [("en", "English"), ("fr", "Français"), ("es", "Español"), ("de", 
              ("zu", "isiZulu"), ("am", "አማርኛ (Amharic)"), ("hi", "हिन्दी (Hindi)")]
 LANG_OPTIONS = "".join(f'<option value="{c}">{n}</option>' for c, n in LANGUAGES)
 
-NAV = [("About us", "about.html"), ("Products", "products.html"),
+NAV = [("Products", "products.html"),
        ("Contact us", "contact.html")]
 
 
@@ -192,7 +192,7 @@ def shell(path, title, description, body, graph, active=None):
     </div>
     <div>
       <p class="foot-h">Company</p>
-      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{PRODUCT_LIST_URL}" rel="noopener" target="_blank">Download the Product List</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
+      <ul><li><a href="{PRODUCT_LIST_URL}" rel="noopener" target="_blank">Download the Product List</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
     </div>
   </div>
   <div class="wrap foot-legal">
@@ -681,7 +681,7 @@ def build_home():
 <section class="wrap block">{product_list_block(r)}</section>
 <section class="band band-mint"><div class="wrap"><div class="sec-head"><h2>How an enquiry works</h2></div><ol class="steps">{steps}</ol></div></section>
 <section class="wrap block"><div class="sec-head"><h2>Molecules with recent Strides approvals</h2><p>US FDA approvals and portfolio additions reported by Strides.</p></div><div class="mol-grid">{"".join(mol_card(m, r) for m in featured)}</div></section>
-<section class="wrap block"><div class="sec-head"><h2>Who we work with</h2></div><div class="prose"><p>{e(HOME["about"])} <a href="about.html">More about Synergice</a></p></div><ul class="audiences">{aud}</ul></section>
+<section class="wrap block"><div class="sec-head"><h2>Who we work with</h2></div><div class="prose"><p>{e(HOME["about"])}</p></div><ul class="audiences">{aud}</ul></section>
 <section class="band band-mint" id="rfq"><div class="wrap narrow">{enquiry_form(path, None, "Request for Quotation")}</div></section>
 <div class="wrap prose">{faq_html(HOME["faqs"])}</div>
 <section class="band band-dark"><div class="wrap cta"><div><h2>Have a molecule in mind?</h2><p>Send one short enquiry. The Synergice partnering team at Strides replies directly.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
@@ -692,46 +692,6 @@ def build_home():
              faq_ld(HOME["faqs"])]
     return path, shell(path, "Synergice | Molecules and partnering enquiries from Strides Pharma Science",
                        "Synergice is the B2B partnering platform of Strides Pharma Science. Browse molecules by therapy area, read approval history and mechanism of action, and enquire directly.",
-                       body, graph, path)
-
-
-def build_about():
-    path = "about.html"
-    crumbs = [("Home", "index.html"), ("About us", path)]
-    secs = {h: ps for h, ps in ABOUT["sections"]}
-    offers = "".join(f'<li><span class="tile-ico">{icon(ic)}</span><h3>{e(h)}</h3><p>{e(p)}</p></li>' for ic, h, p in ABOUT_OFFERS)
-    cats = "".join(f"<li>{e(c)}</li>" for c in ABOUT_CATEGORIES)
-    body = f"""
-<section class="hero about-hero">
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">About us</p>
-      <h1>Leadership through Partnering</h1>
-      <p class="lead">{e(ABOUT["summary"])}</p>
-      <dl class="stats"><div><dt>Countries reached</dt><dd>100+</dd></div><div><dt>Formulations in the partner portfolio</dt><dd>250+</dd></div><div><dt>Strides founded</dt><dd>1990</dd></div></dl>
-    </div>
-  </div>
-</section>
-<div class="wrap">
-{crumbs_html(path, crumbs)}
-<section class="block about-statement"><p class="statement">More than just a platform, Synergice is a dynamic B2B ecosystem, a reflection of our belief that collaboration transforms potential into progress.</p></section>
-<div class="prose"><section class="block"><h2>Who we are</h2>{paras(secs["Who we are"])}</section></div>
-<section class="block"><h2>What partners get</h2><ul class="offers">{offers}</ul></section>
-<section class="block"><h2>Our partner portfolio</h2><ul class="cats">{cats}</ul></section>
-<div class="prose">
-<section class="block"><h2>How we approach partnering</h2>{paras(secs["How we approach partnering"])}</section>
-<section class="block"><h2>Key facts</h2>{kv_table([(k, e(v)) for k, v in COMPANY_FACTS])}</section>
-<section class="block"><h2>Milestones</h2>{timeline_table(ABOUT["timeline"])}</section>
-{faq_html(ABOUT["faqs"])}
-</div>
-</div>
-<section class="band band-dark"><div class="wrap cta"><div><h2>Together, we make more possible</h2><p>Talk to the partnering team about any molecule in the portfolio, or one you do not see listed.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
-"""
-    graph = [{"@type": "AboutPage", "@id": canonical(path) + "#webpage", "url": canonical(path), "name": "About Synergice",
-              "description": ABOUT["summary"], "isPartOf": {"@id": SITE["url"] + "/#website"}, "about": {"@id": SITE["url"] + "/#org"}},
-             faq_ld(ABOUT["faqs"]), crumbs_ld(crumbs)]
-    return path, shell(path, "About Synergice: Leadership through Partnering | Strides Pharma Science",
-                       "Synergice is the dedicated B2B platform of Strides Pharma Science, built on Leadership through Partnering, serving partners in 100+ countries.",
                        body, graph, path)
 
 
@@ -815,11 +775,11 @@ def search_index():
         add(f"{t['name']} therapy area", ther_path(t), " ".join(t["intro"]) + " Molecules: " + ", ".join(m["name"] for m in t["molecules"]) + ".")
         for q, a in t["faqs"]:
             add(f"{t['name']}: {q}", ther_path(t) + "#faq", f"{q} {a}")
-    add("About Synergice", "about.html", ABOUT["summary"] + " " + " ".join(f"{k}: {v}." for k, v in COMPANY_FACTS))
+    add("About Synergice", "index.html", ABOUT["summary"] + " " + " ".join(f"{k}: {v}." for k, v in COMPANY_FACTS))
     for h, ps in ABOUT["sections"]:
-        add(f"About: {h}", "about.html", " ".join(ps))
+        add(f"About: {h}", "index.html", " ".join(ps))
     for q, a in HOME["faqs"] + ABOUT["faqs"]:
-        add(q, "about.html#faq", f"{q} {a}")
+        add(q, "index.html#faq", f"{q} {a}")
     add("How to send an enquiry", "contact.html",
         "To send an enquiry, use the form at the end of any molecule page or on the contact page. Give your full name, work email, "
         "how you heard about us and what you would like to know, such as your market, the dosage form and strengths you need, and "
@@ -839,7 +799,7 @@ def llms_txt():
              "> Synergice is the B2B partnering platform of Strides Pharma Science Limited (Bengaluru, India; European hub in Zug, Switzerland). "
              "This site lists molecules from the Strides portfolio with approval history, mechanism of action and key facts, and takes partnering enquiries. "
              "It is intended for pharmaceutical business partners, not patients.", "",
-             "## Company", f"- [About Synergice]({canonical('about.html')}): who we are, key facts and milestones",
+             "## Company",
              f"- [Contact the partnering team]({canonical('contact.html')}): enquiry form (name, email, how you heard about us, what you want to know)", "",
              "## Therapy areas"]
     lines += [f"- [{t['name']}]({canonical(ther_path(t))}): " + ", ".join(m["name"] for m in t["molecules"]) for t in THERAPIES]
@@ -903,7 +863,7 @@ def main():
     (DIST / "assets").mkdir(parents=True)
     shutil.copytree(ROOT / "static", DIST / "assets", dirs_exist_ok=True)
 
-    pages = [build_home(), build_about(), build_products(), build_contact()]
+    pages = [build_home(), build_products(), build_contact()]
     pages += [build_therapy(t) for t in THERAPIES]
     pages += [build_molecule(m) for m in MOLECULES]
     pages += [build_article(a) for a in ARTICLES]
@@ -930,7 +890,7 @@ def main():
     print(f"{'words':>6}  page")
     for path, n in report:
         # The 600-1,200 word target applies to answer pages, not hubs or forms.
-        target = path.startswith(("molecule/", "articles/")) or path in ("index.html", "about.html")
+        target = path.startswith(("molecule/", "articles/")) or path == "index.html"
         flag = "  < 600" if target and n < 600 else ("  > 1200" if target and n > 1200 else "")
         print(f"{n:>6}  {path}{flag}")
 

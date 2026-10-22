@@ -3,7 +3,6 @@
 > Synergice is the B2B partnering platform of Strides Pharma Science Limited (Bengaluru, India; European hub in Zug, Switzerland). This site lists molecules from the Strides portfolio with approval history, mechanism of action and key facts, and takes partnering enquiries. It is intended for pharmaceutical business partners, not patients.
 
 ## Company
-- [About Synergice](https://www.synergice.com/about.html): who we are, key facts and milestones
 - [Contact the partnering team](https://www.synergice.com/contact.html): enquiry form (name, email, how you heard about us, what you want to know)
 
 ## Therapy areas

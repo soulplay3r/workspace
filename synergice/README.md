@@ -2,7 +2,7 @@
 
 A simple, GEO/AEO-friendly website for **Synergice**, the B2B partnering platform of
 Strides Pharma Science. It replaces the agency's dense product pages with four
-things only: **Home, About us, Products (therapy area → molecule), Contact us**,
+things only: **Products (therapy area → molecule) and Contact us (there is no About page)**,
 plus an on-site **RAG assistant**, **read-aloud** (text to speech) and a **Latest articles** section on the home page for answer engines.
 
 **Before going live, read [`CONTENT_REVIEW.md`](./CONTENT_REVIEW.md).** It lists the
@@ -16,7 +16,7 @@ portfolio and company facts the Strides BD, regulatory and medical teams must co
 | `products.html` | The therapy map plus a filterable A–Z table of all molecules |
 | `therapy/<slug>.html` | One page per therapy area: molecule cards, summaries, comparison table, FAQ |
 | `molecule/<slug>.html` | One page per molecule, built to the agency's **Product Page Framework v2.0** (see below) |
-| `about.html`, `contact.html` | Company facts and the enquiry form: product, full name, email, company, country (all required, per the framework), **how did you hear about us**, and a message (**what would you like to know?**) |
+| `contact.html` | Request for Quotation form: product, full name, email, company, country (all required, per the framework), **how did you hear about us**, and a message (**what would you like to know?**) |
 | `articles/*.html` | Articles listed in the home page's **Latest articles** section, newest first (there is no separate Insights tab) |
 | `llms.txt`, `robots.txt`, `sitemap.xml` | Machine-readable map for AI crawlers and search engines |
 
@@ -61,7 +61,7 @@ redeploy once); `NOINDEX=1` keeps the demo out of search engines and AI crawlers
 - **Fact tables:** key facts, approval history and pharmacokinetics as real HTML tables.
 - **FAQ on every page**, mirrored in `FAQPage` JSON-LD.
 - **Structured data:** `Organization`, `WebSite`, `MedicalWebPage` + `Drug` (ATC code, class, mechanism, route), `CollectionPage`/`ItemList`, `Article`, `BreadcrumbList`.
-- **Length:** molecule, about and article pages fall in the 600–1,200 word range; the build prints a word count per page and flags pages outside it.
+- **Length:** molecule and article pages fall in the 600–1,200 word range; the build prints a word count per page and flags pages outside it.
 - **Crawlable:** static HTML, no client-side rendering; `robots.txt` explicitly allows GPTBot, ClaudeBot, PerplexityBot, Google-Extended and others; `llms.txt` lists every page.
 - **Attribution:** "How did you hear about us?" includes *AI assistant*, so the team can measure answer-engine referrals.
 
