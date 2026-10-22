@@ -90,6 +90,20 @@ Build-time settings (environment variables):
 | `NOINDEX` | *(unset)* | `1` = demo build: `noindex` on every page and a `robots.txt` that blocks all crawlers |
 | `PRIVACY_POLICY_URL` | *(empty)* | Privacy policy linked from the consent checkbox. Empty = a placeholder `privacy.html` (noindex). |
 
+## Language menu
+
+The top bar has a language menu (English, French, Spanish, German, Portuguese, Arabic, Swahili,
+Hausa, Yoruba, Igbo, Zulu, Amharic, Hindi). It uses Google's website translator: the choice is
+saved in the standard `googtrans` cookie and the page reloads translated; English removes it.
+Brand and product names are marked `notranslate`. Edit `LANGUAGES` in `build.py` to change the list.
+Translation needs the site to be served from a normal web host (it does not run inside the Claude preview).
+
+## Product list download
+
+`product_list_block()` shows "Download the Product List" with a QR code
+(`static/img/product-list-qr.svg`) that points to the same PDF as synergice.co
+(`PRODUCT_LIST_URL` in `build.py`). It appears on the home, products and molecule pages and in the footer.
+
 ## Read aloud (text to speech)
 
 Molecule and article pages have a **Listen to this page** button (Pause / Resume / Stop) that

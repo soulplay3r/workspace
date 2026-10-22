@@ -54,7 +54,9 @@ Nov 2022) and the prednisone strengths.
 
 ## 5. Before go-live (web team)
 
-- Replace the stand-in S mark (`S_MARK` in `build.py`, `static/img/synergice-mark.svg`) with the official Strides/Synergice logo SVGs.
+- The site uses a text wordmark ("Synergice® by Strides") with no logo mark. Add the official logo SVG to the header if brand wants one; `static/img/synergice-mark.svg` is only the favicon.
+- **Translation** uses Google's website translator (machine translation). Medical and regulatory wording in other languages is not reviewed; add a note or have key pages professionally translated before launch in those markets.
+- **Product list PDF and QR** link to `https://www.synergice.co/pdf/Synergice-Product-List-2026.pdf` (same target as the QR on synergice.co). Update `PRODUCT_LIST_URL` in `build.py` and regenerate the QR when the file name changes.
 - Set `SITE_URL`, `FORM_ENDPOINT` and (optionally) `CHAT_ENDPOINT`, then rebuild.
 - Set `PRIVACY_POLICY_URL` to the published privacy policy (the consent checkbox links to a placeholder until then).
 - Submit `sitemap.xml` in Google Search Console and Bing Webmaster Tools (Bing feeds Copilot and ChatGPT search).

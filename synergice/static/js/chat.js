@@ -118,7 +118,7 @@
   panel.setAttribute("role", "dialog");
   panel.setAttribute("aria-label", "Synergice assistant");
   panel.innerHTML =
-    '<div class="chat-head"><svg class="smark" viewBox="0 0 60 80" aria-hidden="true"><path d="M47 15 39 7H19L9 17v9l10 10 22 8 10 10v9L41 74H21l-8-8" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+    '<div class="chat-head">' +
     '<div><p class="chat-title">Synergice assistant</p><p class="chat-subtitle">Answers from our molecule library</p></div>' +
     '<button class="chat-tts" type="button" aria-pressed="false" hidden>' + SPEAKER + 'Read aloud</button>' +
     '<button class="chat-close" type="button" aria-label="Close assistant">×</button></div>' +

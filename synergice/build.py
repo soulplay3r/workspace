@@ -100,12 +100,6 @@ def icon(name, cls="ico"):
             f'{ICONS[name]}</svg>')
 
 
-# Faceted S mark, a stand-in drawn from the Strides logo; replace with the
-# official SVG from the brand team before launch (see CONTENT_REVIEW.md).
-S_MARK = ('<svg class="smark" viewBox="0 0 60 80" aria-hidden="true"><path d="M47 15 39 7H19L9 17v9l10 10 22 8 10 10v9L41 74H21l-8-8" '
-          'fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>')
-
-
 # -------------------------------------------------------------- page shell
 def org_ld():
     return {
@@ -134,6 +128,11 @@ def faq_ld(faqs):
     return {"@type": "FAQPage", "mainEntity": [
         {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faqs]}
 
+
+LANGUAGES = [("en", "English"), ("fr", "Français"), ("es", "Español"), ("de", "Deutsch"), ("pt", "Português"),
+             ("ar", "العربية (Arabic)"), ("sw", "Kiswahili"), ("ha", "Hausa"), ("yo", "Yorùbá"), ("ig", "Igbo"),
+             ("zu", "isiZulu"), ("am", "አማርኛ (Amharic)"), ("hi", "हिन्दी (Hindi)")]
+LANG_OPTIONS = "".join(f'<option value="{c}">{n}</option>' for c, n in LANGUAGES)
 
 NAV = [("Home", "index.html"), ("About us", "about.html"), ("Products", "products.html"),
        ("Contact us", "contact.html")]
@@ -172,8 +171,9 @@ def shell(path, title, description, body, graph, active=None):
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap bar">
-    <a class="brand" href="{r}index.html" aria-label="Synergice home">{S_MARK}<span class="brand-text"><span class="brand-name">Synergice<sup>®</sup></span><span class="brand-sub">by Strides</span></span></a>
+    <a class="brand notranslate" href="{r}index.html" aria-label="Synergice home"><span class="brand-text"><span class="brand-name">Synergice<sup>®</sup></span><span class="brand-sub">by Strides</span></span></a>
     <nav class="nav" aria-label="Main">{nav}</nav>
+    <div class="lang notranslate"><svg class="lang-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><select id="lang-select" aria-label="Choose language">{LANG_OPTIONS}</select></div>
     <a class="btn btn-small nav-cta" href="{r}contact.html">Send an enquiry</a>
   </div>
 </header>
@@ -183,7 +183,7 @@ def shell(path, title, description, body, graph, active=None):
 <footer class="site-footer">
   <div class="wrap foot-grid">
     <div class="foot-brand">
-      <p class="foot-name">{S_MARK}<span>Synergice<sup>®</sup></span></p>
+      <p class="foot-name notranslate"><span>Synergice<sup>®</sup></span></p>
       <p>The B2B partnering platform of Strides Pharma Science Limited. Molecule information and partnering enquiries for licensing partners, marketing authorisation holders and distributors.</p>
     </div>
     <div>
@@ -192,7 +192,7 @@ def shell(path, title, description, body, graph, active=None):
     </div>
     <div>
       <p class="foot-h">Company</p>
-      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{r}index.html#articles">Articles</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
+      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{r}index.html#articles">Articles</a></li><li><a href="{PRODUCT_LIST_URL}" rel="noopener" target="_blank">Download the Product List</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
     </div>
   </div>
   <div class="wrap foot-legal">
@@ -372,6 +372,18 @@ def article_cards(r):
         f'<span class="art-more">Read article <span aria-hidden="true">→</span></span></a>' for a in arts) + "</div>"
 
 
+PRODUCT_LIST_URL = "https://www.synergice.co/pdf/Synergice-Product-List-2026.pdf"
+
+
+def product_list_block(r):
+    """'Download the Product List' link with the same QR code as synergice.co."""
+    return (f'<div class="plist"><div class="plist-text"><p class="plist-h">Synergice Product List 2026</p>'
+            '<p>The full partner portfolio in one PDF. Download it, or scan the QR code with your phone.</p>'
+            f'<a class="plist-link" href="{PRODUCT_LIST_URL}" target="_blank" rel="noopener">Download the Product List</a></div>'
+            f'<a class="plist-qr" href="{PRODUCT_LIST_URL}" target="_blank" rel="noopener" aria-label="QR code: download the Synergice product list">'
+            f'<img src="{r}assets/img/product-list-qr.svg" alt="QR code linking to the Synergice product list PDF" width="132" height="132"></a></div>')
+
+
 LISTEN_BTN = ('<button class="btn btn-ghost listen" type="button" data-listen="{targets}" hidden>'
               '<svg class="listen-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
               '<path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>'
@@ -460,22 +472,21 @@ def build_molecule(m):
                  f'<span class="ph-name">{e(name)}</span><span class="ph-form">{e(m["form"])}</span></div>')
     sub = f'{e(m["klass"])} · {e(m["form"])}' + (" · Manufactured by Synergice" if confirmed else "")
     related = [MOL[s2] for s2 in m["related"][:3] if s2 in MOL]
-    toc = [("about", f"About {name}"), ("clinical", "Clinical information"), ("product", "Product information"),
-           ("faq", "FAQs"), ("enquire", "Request this product")]
     dq = e(f"How does {lname} work?")
     body = f"""
 <div class="wrap">
 {crumbs_html(path, crumbs)}
+<div class="mol-shell">
+<div class="mol-main">
 <header class="page-head mol-head">
   <h1>{e(name)}</h1>
   <p class="sub">{sub}</p>
-  <div class="actions">{LISTEN_BTN.format(targets="#about,#clinical,#product,#faq")}</div>
+  <div class="actions">{LISTEN_BTN.format(targets="#about,#clinical,#product,#faq")}<button class="btn btn-ghost" type="button" data-chat-open data-q="{dq}">Ask the assistant</button></div>
 </header>
 <section class="prod-top" aria-label="Product details">
   {image}
   <dl class="spec-grid">{spec_cards(m, r)}</dl>
 </section>
-<div class="mol-layout">
 <article class="prose">
   <section class="block" id="about"><h2>About {e(name)}</h2><p>{e(m["overview_molecule"])}</p><p>{e(fw["manufacture"])}</p></section>
   <section class="block" id="clinical"><h2>Clinical information</h2>
@@ -491,15 +502,13 @@ def build_molecule(m):
   </section>
   {faq_html(fw["faqs"])}
 </article>
-<aside class="side">
-  <nav class="toc" aria-label="On this page"><p class="toc-h">On this page</p>{"".join(f'<a href="#{i}">{e(l)}</a>' for i, l in toc)}</nav>
-  <div class="side-card"><p class="side-h">Request this product</p><p>Send an enquiry to our business development team. {e(RESPONSE_PROMISE)}</p><a class="btn btn-block" href="#enquire">Submit an enquiry</a><button class="btn btn-ghost btn-block" type="button" data-chat-open data-q="{dq}">Ask the assistant</button></div>
-</aside>
+</div>
+<aside class="mol-form" id="enquire" aria-label="Request for Quotation"><div class="form-card">{enquiry_form(path, m)}</div></aside>
 </div>
 <section class="block"><h2>Related products</h2><div class="mol-grid">{"".join(mol_card(x, r) for x in related)}</div><p class="more"><a href="{r}{ther_path(t)}">All {e(t["name"].lower())} products →</a></p></section>
+<section class="block">{product_list_block(r)}</section>
 <section class="disclaimer" aria-label="Disclaimer"><p class="disclaimer-h">Disclaimer</p><p>{e(DISCLAIMER)}</p><p>Last updated {SITE["updated_label"]}.</p></section>
 </div>
-<section class="band band-mint" id="enquire"><div class="wrap narrow">{enquiry_form(path, m)}</div></section>
 """
     graph = [
         {"@type": "MedicalWebPage", "@id": canonical(path) + "#webpage", "url": canonical(path),
@@ -608,6 +617,7 @@ def build_products():
 <header class="page-head"><p class="eyebrow">Products</p><h1>Molecules by therapy area</h1><p class="sub">Choose a therapy area on the map, or search the full list below.</p></header>
 <section class="answer"><p class="answer-label">In brief</p><p>Synergice lists molecules from the Strides Pharma Science portfolio in {len(THERAPIES)} therapy areas. Each molecule page explains when the molecule was first approved, how it works and its key facts, and includes an enquiry form for business partners.</p></section>
 <section class="block"><h2 id="therapy-map-h">Therapy areas</h2>{therapy_map(r)}</section>
+<section class="block">{product_list_block(r)}</section>
 <section class="block" id="all"><h2>All molecules A–Z</h2>
   <div class="filter"><label for="mol-filter">Filter molecules</label><input id="mol-filter" type="search" placeholder="Type a molecule, brand, class or therapy area" data-filter="#mol-table tbody tr"></div>
   <div class="table-wrap"><table class="list" id="mol-table"><thead><tr><th scope="col">Molecule</th><th scope="col">Therapy area</th><th scope="col">Drug class</th><th scope="col">First approved</th></tr></thead><tbody>{rows}</tbody></table></div>
@@ -652,6 +662,7 @@ def build_home():
   </div>
 </section>
 <section class="wrap block" id="therapy-areas"><div class="sec-head"><h2 id="therapy-map-h">Browse by therapy area</h2><p>Select a therapy area to see its molecules.</p></div>{therapy_map(r)}</section>
+<section class="wrap block">{product_list_block(r)}</section>
 <section class="band band-mint"><div class="wrap"><div class="sec-head"><h2>How an enquiry works</h2></div><ol class="steps">{steps}</ol></div></section>
 <section class="wrap block"><div class="sec-head"><h2>Molecules with recent Strides approvals</h2><p>US FDA approvals and portfolio additions reported by Strides.</p></div><div class="mol-grid">{"".join(mol_card(m, r) for m in featured)}</div></section>
 <section class="wrap block"><div class="sec-head"><h2>Who we work with</h2></div><div class="prose"><p>{e(HOME["about"])} <a href="about.html">More about Synergice</a></p></div><ul class="audiences">{aud}</ul></section>
