@@ -25,7 +25,7 @@ from molecules_a import MOLECULES_A  # noqa: E402
 from molecules_b import MOLECULES_B  # noqa: E402
 from molecules_c import MOLECULES_C  # noqa: E402
 from framework_fields import FIELDS  # noqa: E402
-from pages import (ABOUT, ARTICLES, COMPANY_FACTS, CONTACT, COUNTRIES, DISCLAIMER,  # noqa: E402
+from pages import (ABOUT, ABOUT_CATEGORIES, ABOUT_OFFERS, ARTICLES, COMPANY_FACTS, CONTACT, COUNTRIES, DISCLAIMER,  # noqa: E402
                    FAQ_FIXED, HEAR_ABOUT, HOME, INFO_QUALITY, INFO_SUPPLY, RESPONSE_PROMISE)
 
 SITE = {
@@ -134,7 +134,7 @@ LANGUAGES = [("en", "English"), ("fr", "Français"), ("es", "Español"), ("de", 
              ("zu", "isiZulu"), ("am", "አማርኛ (Amharic)"), ("hi", "हिन्दी (Hindi)")]
 LANG_OPTIONS = "".join(f'<option value="{c}">{n}</option>' for c, n in LANGUAGES)
 
-NAV = [("Home", "index.html"), ("About us", "about.html"), ("Products", "products.html"),
+NAV = [("About us", "about.html"), ("Products", "products.html"),
        ("Contact us", "contact.html")]
 
 
@@ -192,7 +192,7 @@ def shell(path, title, description, body, graph, active=None):
     </div>
     <div>
       <p class="foot-h">Company</p>
-      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{r}index.html#articles">Articles</a></li><li><a href="{PRODUCT_LIST_URL}" rel="noopener" target="_blank">Download the Product List</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
+      <ul><li><a href="{r}about.html">About us</a></li><li><a href="{PRODUCT_LIST_URL}" rel="noopener" target="_blank">Download the Product List</a></li><li><a href="{r}contact.html">Contact us</a></li><li><a href="{r}llms.txt">llms.txt</a></li></ul>
     </div>
   </div>
   <div class="wrap foot-legal">
@@ -326,6 +326,12 @@ def build_thank_you():
 """
     html = shell(path, "Thank you | Synergice", "Enquiry received.", body, [], None)
     return path, html.replace('content="index, follow, max-snippet:-1"', 'content="noindex"')
+
+
+def api_card(m, r):
+    t = THER[m["therapy"]]
+    return (f'<a class="api-card" href="{r}{mol_path(m)}"><span class="api-n">{e(m["name"])}</span>'
+            f'<span class="api-t">{e(t["name"])}</span><span class="api-go" aria-hidden="true">→</span></a>')
 
 
 def mol_card(m, r):
@@ -471,7 +477,12 @@ def build_molecule(m):
         image = (f'<div class="prod-img prod-img-ph" role="img" aria-label="{e(alt)}">{icon(t["icon"], "ico ph-ico")}'
                  f'<span class="ph-name">{e(name)}</span><span class="ph-form">{e(m["form"])}</span></div>')
     sub = f'{e(m["klass"])} · {e(m["form"])}' + (" · Manufactured by Synergice" if confirmed else "")
-    related = [MOL[s2] for s2 in m["related"][:3] if s2 in MOL]
+    # Related APIs: curated links first, then the rest of the therapy area (max 6).
+    related = []
+    for s2 in m["related"] + [x["slug"] for x in t["molecules"]]:
+        if s2 in MOL and s2 != m["slug"] and MOL[s2] not in related:
+            related.append(MOL[s2])
+    related = related[:6]
     dq = e(f"How does {lname} work?")
     body = f"""
 <div class="wrap">
@@ -505,7 +516,8 @@ def build_molecule(m):
 </div>
 <aside class="mol-form" id="enquire" aria-label="Request for Quotation"><div class="form-card">{enquiry_form(path, m)}</div></aside>
 </div>
-<section class="block"><h2>Related products</h2><div class="mol-grid">{"".join(mol_card(x, r) for x in related)}</div><p class="more"><a href="{r}{ther_path(t)}">All {e(t["name"].lower())} products →</a></p></section>
+<section class="block" id="related"><h2>Related APIs</h2><div class="api-grid">{"".join(api_card(x, r) for x in related)}</div><p class="more"><a href="{r}{ther_path(t)}">All {e(t["name"].lower())} molecules →</a></p></section>
+<section class="block" id="articles"><div class="sec-head"><h2>Latest articles</h2><p>Guides for teams sourcing {e(lname)} and other finished dosage forms.</p></div>{article_cards(r)}</section>
 <section class="block">{product_list_block(r)}</section>
 <section class="disclaimer" aria-label="Disclaimer"><p class="disclaimer-h">Disclaimer</p><p>{e(DISCLAIMER)}</p><p>Last updated {SITE["updated_label"]}.</p></section>
 </div>
@@ -605,22 +617,22 @@ def build_products():
     rows = "".join(
         f'<tr data-q="{e((m["name"] + " " + " ".join(m["aka"]) + " " + THER[m["therapy"]]["name"] + " " + m["klass"]).lower())}">'
         f'<td><a href="{mol_path(m)}">{e(m["name"])}</a></td><td><a href="{ther_path(THER[m["therapy"]])}">{e(THER[m["therapy"]]["name"])}</a></td>'
-        f'<td>{e(m["klass"])}</td><td>{e(m["first_approval"].split(",")[0])}</td></tr>' for m in MOLECULES)
+        f'<td>{e(m["klass"])}</td></tr>' for m in MOLECULES)
     faqs = [
         ("How are products organised on Synergice?", f"Products are organised into {len(THERAPIES)} therapy areas, from cardiovascular and oncology to women's health. Each therapy area lists its molecules, and each molecule has its own page with key facts, approval history and mechanism of action."),
         ("What does each molecule page include?", "An answer-first summary, a key facts table, approval history, mechanism of action, approved uses, pharmacokinetics at a glance, frequently asked questions and an enquiry form."),
         ("Can I enquire about a product that is not on this list?", "Yes. The Strides partner portfolio includes more than 250 formulations. Use the contact form and name the molecule, dosage form and market."),
     ]
     body = f"""
+{hero_block("#all")}
 <div class="wrap">
 {crumbs_html(path, crumbs)}
-<header class="page-head"><p class="eyebrow">Products</p><h1>Molecules by therapy area</h1><p class="sub">Choose a therapy area on the map, or search the full list below.</p></header>
 <section class="answer"><p class="answer-label">In brief</p><p>Synergice lists molecules from the Strides Pharma Science portfolio in {len(THERAPIES)} therapy areas. Each molecule page explains when the molecule was first approved, how it works and its key facts, and includes an enquiry form for business partners.</p></section>
 <section class="block"><h2 id="therapy-map-h">Therapy areas</h2>{therapy_map(r)}</section>
 <section class="block">{product_list_block(r)}</section>
 <section class="block" id="all"><h2>All molecules A–Z</h2>
   <div class="filter"><label for="mol-filter">Filter molecules</label><input id="mol-filter" type="search" placeholder="Type a molecule, brand, class or therapy area" data-filter="#mol-table tbody tr"></div>
-  <div class="table-wrap"><table class="list" id="mol-table"><thead><tr><th scope="col">Molecule</th><th scope="col">Therapy area</th><th scope="col">Drug class</th><th scope="col">First approved</th></tr></thead><tbody>{rows}</tbody></table></div>
+  <div class="table-wrap"><table class="list" id="mol-table"><thead><tr><th scope="col">Molecule</th><th scope="col">Therapy area</th><th scope="col">Drug class</th></tr></thead><tbody>{rows}</tbody></table></div>
   <p class="filter-empty" hidden>No molecules match. <a href="contact.html">Ask the partnering team</a> about it instead.</p>
 </section>
 <div class="prose">{faq_html(faqs)}</div>
@@ -636,16 +648,10 @@ def build_products():
                        body, graph, path)
 
 
-def build_home():
-    path = "index.html"
-    r = ""
-    featured = [MOL[s] for s in ["mycophenolate-mofetil", "colchicine", "naproxen-sodium", "potassium-chloride"]]
+def hero_block(browse_href="products.html"):
     search_data = json.dumps([{"n": m["name"], "u": mol_path(m), "t": THER[m["therapy"]]["name"],
                                "k": " ".join(m["aka"]).lower()} for m in MOLECULES], ensure_ascii=False)
-    steps = "".join(f'<li><span class="step-n">{i + 1}</span><h3>{e(h)}</h3><p>{e(p)}</p></li>' for i, (h, p) in enumerate(HOME["steps"]))
-    aud = "".join(f"<li><h3>{e(h)}</h3><p>{e(p)}</p></li>" for h, p in HOME["audiences"])
-    body = f"""
-<section class="hero">
+    return f"""<section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <p class="eyebrow">{e(HOME["eyebrow"])}</p>
@@ -653,20 +659,29 @@ def build_home():
       <p class="lead">{e(HOME["lead"])}</p>
       <div class="search" role="search">
         <label for="hero-search">Find a molecule</label>
-        <div class="search-box"><input id="hero-search" type="search" autocomplete="off" placeholder="Try atorvastatin, tacrolimus or Coartem" aria-controls="hero-results" aria-expanded="false"><a class="btn" href="products.html">Browse all</a></div>
+        <div class="search-box"><input id="hero-search" type="search" autocomplete="off" placeholder="Try atorvastatin, tacrolimus or Coartem" aria-controls="hero-results" aria-expanded="false"><a class="btn" href="{browse_href}">Browse all</a></div>
         <ul id="hero-results" class="search-results" role="listbox" hidden></ul>
         <script type="application/json" id="molecule-index">{search_data}</script>
       </div>
       <dl class="stats"><div><dt>Therapy areas</dt><dd>{len(THERAPIES)}</dd></div><div><dt>Formulations in the partner portfolio</dt><dd>250+</dd></div><div><dt>Countries supplied by Strides</dt><dd>100+</dd></div></dl>
     </div>
   </div>
-</section>
+</section>"""
+
+
+def build_home():
+    path = "index.html"
+    r = ""
+    featured = [MOL[s] for s in ["mycophenolate-mofetil", "colchicine", "naproxen-sodium", "potassium-chloride"]]
+    steps = "".join(f'<li><span class="step-n">{i + 1}</span><h3>{e(h)}</h3><p>{e(p)}</p></li>' for i, (h, p) in enumerate(HOME["steps"]))
+    aud = "".join(f"<li><h3>{e(h)}</h3><p>{e(p)}</p></li>" for h, p in HOME["audiences"])
+    body = f"""
+{hero_block()}
 <section class="wrap block" id="therapy-areas"><div class="sec-head"><h2 id="therapy-map-h">Browse by therapy area</h2><p>Select a therapy area to see its molecules.</p></div>{therapy_map(r)}</section>
 <section class="wrap block">{product_list_block(r)}</section>
 <section class="band band-mint"><div class="wrap"><div class="sec-head"><h2>How an enquiry works</h2></div><ol class="steps">{steps}</ol></div></section>
 <section class="wrap block"><div class="sec-head"><h2>Molecules with recent Strides approvals</h2><p>US FDA approvals and portfolio additions reported by Strides.</p></div><div class="mol-grid">{"".join(mol_card(m, r) for m in featured)}</div></section>
 <section class="wrap block"><div class="sec-head"><h2>Who we work with</h2></div><div class="prose"><p>{e(HOME["about"])} <a href="about.html">More about Synergice</a></p></div><ul class="audiences">{aud}</ul></section>
-<section class="wrap block" id="articles"><div class="sec-head"><h2>Latest articles</h2><p>Practical guides for regulatory and sourcing teams.</p></div>{article_cards(r)}</section>
 <section class="band band-mint" id="rfq"><div class="wrap narrow">{enquiry_form(path, None, "Request for Quotation")}</div></section>
 <div class="wrap prose">{faq_html(HOME["faqs"])}</div>
 <section class="band band-dark"><div class="wrap cta"><div><h2>Have a molecule in mind?</h2><p>Send one short enquiry. The Synergice partnering team at Strides replies directly.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
@@ -683,26 +698,40 @@ def build_home():
 def build_about():
     path = "about.html"
     crumbs = [("Home", "index.html"), ("About us", path)]
-    secs = "".join(f'<section class="block"><h2>{e(h)}</h2>{paras(ps)}</section>' for h, ps in ABOUT["sections"])
+    secs = {h: ps for h, ps in ABOUT["sections"]}
+    offers = "".join(f'<li><span class="tile-ico">{icon(ic)}</span><h3>{e(h)}</h3><p>{e(p)}</p></li>' for ic, h, p in ABOUT_OFFERS)
+    cats = "".join(f"<li>{e(c)}</li>" for c in ABOUT_CATEGORIES)
     body = f"""
+<section class="hero about-hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">About us</p>
+      <h1>Leadership through Partnering</h1>
+      <p class="lead">{e(ABOUT["summary"])}</p>
+      <dl class="stats"><div><dt>Countries reached</dt><dd>100+</dd></div><div><dt>Formulations in the partner portfolio</dt><dd>250+</dd></div><div><dt>Strides founded</dt><dd>1990</dd></div></dl>
+    </div>
+  </div>
+</section>
 <div class="wrap">
 {crumbs_html(path, crumbs)}
-<header class="page-head"><p class="eyebrow">About us</p><h1>{e(ABOUT["h1"])}</h1></header>
+<section class="block about-statement"><p class="statement">More than just a platform, Synergice is a dynamic B2B ecosystem, a reflection of our belief that collaboration transforms potential into progress.</p></section>
+<div class="prose"><section class="block"><h2>Who we are</h2>{paras(secs["Who we are"])}</section></div>
+<section class="block"><h2>What partners get</h2><ul class="offers">{offers}</ul></section>
+<section class="block"><h2>Our partner portfolio</h2><ul class="cats">{cats}</ul></section>
 <div class="prose">
-<section class="answer"><p class="answer-label">In brief</p><p>{e(ABOUT["summary"])}</p></section>
+<section class="block"><h2>How we approach partnering</h2>{paras(secs["How we approach partnering"])}</section>
 <section class="block"><h2>Key facts</h2>{kv_table([(k, e(v)) for k, v in COMPANY_FACTS])}</section>
-{secs}
 <section class="block"><h2>Milestones</h2>{timeline_table(ABOUT["timeline"])}</section>
 {faq_html(ABOUT["faqs"])}
 </div>
 </div>
-<section class="band band-dark"><div class="wrap cta"><div><h2>Talk to the partnering team</h2><p>Ask about any molecule in the portfolio, or one you do not see listed.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
+<section class="band band-dark"><div class="wrap cta"><div><h2>Together, we make more possible</h2><p>Talk to the partnering team about any molecule in the portfolio, or one you do not see listed.</p></div><a class="btn btn-light" href="contact.html">Contact us</a></div></section>
 """
     graph = [{"@type": "AboutPage", "@id": canonical(path) + "#webpage", "url": canonical(path), "name": "About Synergice",
               "description": ABOUT["summary"], "isPartOf": {"@id": SITE["url"] + "/#website"}, "about": {"@id": SITE["url"] + "/#org"}},
              faq_ld(ABOUT["faqs"]), crumbs_ld(crumbs)]
-    return path, shell(path, "About Synergice, the B2B partnering platform of Strides Pharma Science",
-                       "Synergice brings the Strides Pharma Science partner portfolio of 250+ formulations into one place for licensing partners, MAHs and distributors in 100+ countries.",
+    return path, shell(path, "About Synergice: Leadership through Partnering | Strides Pharma Science",
+                       "Synergice is the dedicated B2B platform of Strides Pharma Science, built on Leadership through Partnering, serving partners in 100+ countries.",
                        body, graph, path)
 
 
@@ -736,7 +765,7 @@ def build_contact():
 
 def build_article(a):
     path = art_path(a)
-    crumbs = [("Home", "index.html"), ("Articles", "index.html#articles"), (a["title"], path)]
+    crumbs = [("Home", "index.html"), (a["title"], path)]
     secs = "".join(f'<section class="block"><h2>{e(h)}</h2>{paras(ps)}</section>' for h, ps in a["sections"])
     body = f"""
 <div class="wrap">

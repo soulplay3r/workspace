@@ -16,6 +16,17 @@ COMPANY_FACTS = [
     ("Regulatory approvals across the network", "Including US FDA, UK MHRA, Australian TGA, EU GMP and WHO"),
 ]
 
+# About page blocks, worded after Strides' published description of Synergice.
+ABOUT_OFFERS = [
+    ("hexagon", "Advanced manufacturing capabilities", "Finished dosage forms made across the Strides network, including oral solids, soft gelatin capsules, liquids and sterile products, at sites approved by regulators such as the US FDA, UK MHRA, TGA and WHO."),
+    ("shield", "Robust regulatory expertise", "Dossiers compiled to CTD, eCTD or ACTD, registration support in the destination market and inspection-ready documentation shared with partners during evaluation."),
+    ("bolt", "Innovative pharmaceutical solutions", "Value-added products, lyophilised orally dissolving tablets, women's health hormones and end-to-end biopharmaceutical CDMO services alongside the generics portfolio."),
+]
+ABOUT_CATEGORIES = [
+    "Generics", "Sterile injectables and value-added products", "Women's health hormones",
+    "Lyophilised orally dissolving tablets", "Biopharmaceutical CDMO services",
+]
+
 HOME = {
     "eyebrow": "B2B partnering platform of Strides Pharma Science",
     "h1": "Molecule information and partnering enquiries in one place",
@@ -43,7 +54,7 @@ HOME = {
 
 ABOUT = {
     "h1": "About Synergice",
-    "summary": "Synergice is the B2B partnering platform of Strides Pharma Science Limited, a global pharmaceutical company founded in 1990 and headquartered in Bengaluru, India. It brings a partner-ready portfolio of more than 250 formulations into one place for licensing partners, marketing authorisation holders, distributors and institutional buyers in more than 100 countries.",
+    "summary": "Synergice is the dedicated B2B platform of Strides Pharma Science Limited, built on the principle of Leadership through Partnering. Designed to meet diverse portfolio needs, it brings together the full breadth of Strides' offerings for licensing partners, marketing authorisation holders, distributors and institutional buyers in more than 100 countries.",
     "sections": [
         ("Who we are", [
             "Strides Pharma Science develops and manufactures finished dosage forms for regulated and emerging markets. Its manufacturing network holds approvals from authorities including the US FDA, the UK MHRA, Australia's TGA and the WHO, and its products reach patients in more than 100 countries.",

@@ -457,3 +457,22 @@ body { top: 0 !important; }
 .rfq .field:has(.phone) { grid-column: 1 / -1; }
 .ph-ico { position: absolute; left: 50%; top: 36%; right: auto; transform: translate(-50%, -50%); width: 42%; height: 42%; }
 @media (max-width: 480px) { .nav-cta { display: none; } }
+
+/* Related APIs (Dr. Reddy's-style cards) */
+.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.api-card { position: relative; display: flex; flex-direction: column; gap: 6px; min-height: 150px; padding: 22px 22px 64px; border: 1px solid var(--line); border-radius: 10px; background: #fff; text-decoration: none; color: var(--charcoal); }
+.api-n { font-size: var(--step-1); font-weight: 600; line-height: 1.2; }
+.api-t { color: var(--muted); }
+.api-go { position: absolute; right: 20px; bottom: 18px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--green-medium); color: var(--green-medium); font-size: 1.2rem; transition: background .15s, color .15s; }
+.api-card:hover { border-color: var(--green-bright); color: var(--charcoal); }
+.api-card:hover .api-go { background: var(--green-medium); color: #fff; }
+
+/* About page */
+.about-statement .statement { font-size: var(--step-2); line-height: 1.35; max-width: 32ch; color: var(--green-dark); font-weight: 500; border-left: 5px solid var(--spark); padding-left: 24px; margin: 8px 0; }
+.offers { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.offers li { border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: #fff; min-width: 0; }
+.offers .tile-ico { margin-bottom: 12px; }
+.offers p { color: var(--muted); margin: 0; }
+@media (max-width: 860px) { .offers { grid-template-columns: 1fr; } }
+.cats { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.cats li { padding: 10px 18px; border-radius: 999px; background: var(--mint); color: var(--green-dark); font-weight: 600; }
